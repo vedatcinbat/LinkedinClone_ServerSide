@@ -1,0 +1,27 @@
+# ASP.NET Core
+*.obj
+*.pdb
+*.dll
+*.exe
+*.suo
+*.cache
+*.log
+*.vscode
+/.vs
+/.idea
+/.vscode
+*.csproj.user
+*.publishsettings
+
+# ASP.NET Core Scaffolding
+Generated_Code/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nuget.targets
+*.nuget.props
+
+**/appsettings.json
+**/appsettings.Development.json
