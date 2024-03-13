@@ -19,47 +19,14 @@ public class CompanyService : ICompanyService
         this._dbContext = dbContext;
     }
 
-    public async Task<List<GetCompanyApiResponse>> GetAllCompanies()
+    public async Task<List<Company>> GetAllCompanies()
     {
         List<Company> companies = await _dbContext.Companies.Include("CurrentAvailableJobs").Include("TalentManagers").ToListAsync();
         
-        List<GetCompanyApiResponse> getCompanyApiResponses = companies.Select(company => new GetCompanyApiResponse
-        {
-            CompanyId = company.CompanyId,
-            CompanyName = company.CompanyName,
-            Industry = company.Industry,
-            Description = company.Description,
-            EmployeeCount = company.EmployeeCount,
-            WebsiteUrl = company.WebsiteUrl,
-            LogoUrl = company.LogoUrl,
-            FoundedAt = company.FoundedAt,
-            CurrentAvailableJobs = company.CurrentAvailableJobs.Select(job => new JobDto
-            {
-                JobId = job.JobId,
-                JobTitle = job.JobTitle,
-                Description = job.Description,
-                Location = job.Location,
-                PostedAt = job.PostedAt,
-                Deadline = job.Deadline
-            }),
-            TalentManagers = company.TalentManagers.Select(user => new UserTalentManagerResponse
-            {
-                UserId = user.UserId,
-                Firstname = user.Firstname,
-                Lastname = user.Lastname,
-                HashedPassword = user.HashedPassword,
-                Email = user.Email,
-                Age = user.Age,
-                Country = user.Country,
-                CurrentLanguage = user.CurrentLanguage,
-                ProfilePictureUrl = user.ProfilePictureUrl
-            }),
-        }).ToList();
-        
-        return getCompanyApiResponses;
+        return companies;
     }
 
-    public async Task<CreateCompanyApiResponse> CreateCompany(CreateCompanyApiRequest createCompanyApiRequest)
+    public async Task<Company> CreateCompany(CreateCompanyApiRequest createCompanyApiRequest)
     {
         int companyId = await _dbContext.Companies.CountAsync() + 1;
         
@@ -80,48 +47,6 @@ public class CompanyService : ICompanyService
         await _dbContext.Companies.AddAsync(newCompany);
         await _dbContext.SaveChangesAsync();
 
-        CreateCompanyApiResponse createCompanyApiResponse = new CreateCompanyApiResponse
-        {
-            CompanyId = newCompany.CompanyId,
-            CompanyName = newCompany.CompanyName,
-            Industry = newCompany.Industry,
-            Description = newCompany.Description,
-            EmployeeCount = createCompanyApiRequest.EmployeeCount,
-            WebsiteUrl = newCompany.WebsiteUrl,
-            LogoUrl = newCompany.LogoUrl,
-            FoundedAt = newCompany.FoundedAt,
-        };
-
-        return createCompanyApiResponse;
-    }
-
-    public async Task<List<UserTalentManagerResponse>> GetCompanyTalentManagers(int companyId)
-    {
-        Company company = await _dbContext.Companies.Include("TalentManagers").FirstOrDefaultAsync(company => company.CompanyId == companyId);
-
-        if (company != null)
-        {
-            var users = company.TalentManagers.ToList();
-
-            List<UserTalentManagerResponse> userTalentManagerResponses = users.Select(user =>
-                new UserTalentManagerResponse
-                {
-                    UserId = user.UserId,
-                    Firstname = user.Firstname,
-                    Lastname = user.Lastname,
-                    HashedPassword = user.HashedPassword,
-                    Email = user.Email,
-                    Age = user.Age,
-                    Country = user.Country,
-                    CurrentLanguage = user.CurrentLanguage,
-                    ProfilePictureUrl = user.ProfilePictureUrl
-                }).ToList();
-
-            return userTalentManagerResponses;
-        }
-
-        return null;
-
-
+        return newCompany;
     }
 }
