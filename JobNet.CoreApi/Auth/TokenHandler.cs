@@ -46,7 +46,6 @@ public static class TokenHandler
                 AccessToken = accessToken,
                 Expiration = expiration,
                 RefreshToken = refreshToken,
-                Claims = claims,
                 Email = user.Email,
                 Firstname = user.Firstname,
                 Lastname = user.Lastname,

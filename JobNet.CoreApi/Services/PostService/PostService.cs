@@ -20,7 +20,7 @@ public class PostService : IPostService
 
     public async Task<List<Post>> GetAllPosts()
     {
-        List<Post> posts = await _dbContext.Posts
+        List<Post> posts = await _dbContext.Posts.Where(post => post.IsDeleted == false)
             .Include(p => p.User)
             .ThenInclude(u => u.Company)
             .Include(p => p.Comments.Where(c => c.IsDeleted == false && c.User.IsDeleted == false))
