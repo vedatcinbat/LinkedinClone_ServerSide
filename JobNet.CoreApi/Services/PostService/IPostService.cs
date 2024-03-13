@@ -6,9 +6,8 @@ namespace JobNet.CoreApi.Services.PostService;
 
 public interface IPostService
 {
-    Task<List<PostSimpleApiResponse>> GetAllPosts();
+    Task<List<Post>> GetAllPosts();
 
-    Task<PostSimpleApiResponse> GetOnePost(int postId);
+    Task<Post> GetOnePost(int postId);
     Task<CreatePostApiResponse> CreatePost(int userId, CreatePostApiRequest createPostApiRequest);
-    
 }

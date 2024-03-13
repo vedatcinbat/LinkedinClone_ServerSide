@@ -232,7 +232,7 @@ public class UserController : ControllerBase
             UserId = user.UserId,
             Firstname = user.Firstname,
             Lastname = user.Lastname,
-            Posts = user.Posts.Select(post => new PostSimpleApiResponseWithoutUser()
+            Posts = user.Posts.Where(post => post.IsDeleted == false).Select(post => new PostSimpleApiResponseWithoutUser()
             {
                 PostId = post.PostId,
                 IsDeleted = post.IsDeleted,
@@ -244,7 +244,7 @@ public class UserController : ControllerBase
                 ImagesContent = post.ImagesContent,
                 CommentCount = post.CommentCount,
                 LikeCount = post.LikeCount,
-                Comments = post.Comments.Select(comment => new PostCommentSimpleApiResponse
+                Comments = post.Comments.Where(c => c.IsDeleted == false && c.User.IsDeleted == false).Select(comment => new PostCommentSimpleApiResponse
                 {
                     CommentId = comment.CommentId,
                     Content = comment.Content,
@@ -260,7 +260,7 @@ public class UserController : ControllerBase
                     },
 
                 }).ToList(),
-                Likes = post.Likes.Select(like => new LikeSimpleResponse
+                Likes = post.Likes.Where(like => like.IsDeleted == false && like.User.IsDeleted == false).Select(like => new LikeSimpleResponse
                 {
                     LikeId = like.LikeId,
                     IsDeleted = like.IsDeleted,

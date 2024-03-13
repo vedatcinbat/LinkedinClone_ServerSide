@@ -24,7 +24,7 @@ public class UserService(JobNetDbContext dbContext) : IUserService
 
     public async Task<User?> GetOneUserProfileDetails(int userId)
     {
-        User user = await
+        User? user = await
             dbContext.Users
                 .Where(user => user.IsDeleted == false)
                 .Include(u => u.Company)

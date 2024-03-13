@@ -1,4 +1,5 @@
-﻿using JobNet.CoreApi.Auth;
+﻿using System.Security.Claims;
+using JobNet.CoreApi.Auth;
 using JobNet.CoreApi.Services.UserService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,5 +30,19 @@ public class AuthController : ControllerBase
         var token = TokenHandler.CreateToken(_configuration, user);
 
         return Ok(token);
+    }
+
+    [HttpGet("getUserId")]
+    public async Task<IActionResult> GetUserId()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            var userId = userIdClaim.Value;
+            return Ok($"UserId : {userId}");
+        }
+
+        return Ok("UserId not found !");
     }
 }
