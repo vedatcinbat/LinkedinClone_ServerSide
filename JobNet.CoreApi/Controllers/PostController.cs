@@ -13,7 +13,7 @@ namespace JobNet.CoreApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+
 public class PostController(IPostService postService, JobNetDbContext _dbContext) : ControllerBase
 {
     private readonly IPostService _postService = postService;
@@ -202,6 +202,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
     
 
     [HttpPost("/createPost")]
+    [Authorize]
     public async Task<IActionResult> CreatePost(CreatePostApiRequest createPostApiRequest)
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
@@ -227,6 +228,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
     }
 
     [HttpDelete("/deletePost/{postId:int}")]
+    [Authorize]
     public async Task<IActionResult> DeletePost([FromRoute] int postId)
     {
         Post post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.IsDeleted == false && p.PostId == postId);

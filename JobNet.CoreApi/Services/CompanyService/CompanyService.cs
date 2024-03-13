@@ -21,7 +21,10 @@ public class CompanyService : ICompanyService
 
     public async Task<List<Company>> GetAllCompanies()
     {
-        List<Company> companies = await _dbContext.Companies.Include("CurrentAvailableJobs").Include("TalentManagers").ToListAsync();
+        List<Company> companies = await _dbContext.Companies
+            .Include(c => c.CurrentAvailableJobs)
+            .Include(c => c.TalentManagers)
+            .ToListAsync();
         
         return companies;
     }

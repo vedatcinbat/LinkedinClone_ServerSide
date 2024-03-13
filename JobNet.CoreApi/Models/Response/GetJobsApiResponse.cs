@@ -21,5 +21,5 @@ public class GetJobsApiResponse
     public int? CompanyId { get; set; }
     public GetCompanyApiResponse? Company { get; set; }
 
-    public ICollection<UserJobLike>? UserJobLikes { get; set; } = new List<UserJobLike>();
+    public ICollection<UserSimpleWithSimpleCompanyResponse>? AppliedUsers { get; set; } = new List<UserSimpleWithSimpleCompanyResponse>();
 }

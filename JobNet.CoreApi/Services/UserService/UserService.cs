@@ -129,11 +129,6 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         var user = await dbContext.Users.Include("Company").Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
         
         var company = await dbContext.Companies.FirstOrDefaultAsync(c => c.CompanyId == companyId);
-
-        if (user == null || company == null)
-        {
-            return null;
-        }
         
         user.CompanyId = companyId;
         user.Company = company;

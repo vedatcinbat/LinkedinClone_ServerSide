@@ -9,9 +9,9 @@ public class Job
     
     public string JobTitle { get; set; }
     
-    public JobType JobType { get; set; }
+    public string JobType { get; set; }
     
-    public JobEmployeeLevel JobEmployeeLevel { get; set; }
+    public string JobEmployeeLevel { get; set; }
     public string Description { get; set; }
     
     public string Location { get; set; }
@@ -20,9 +20,14 @@ public class Job
     
     public DateTime Deadline { get; set; }
     
+    [ForeignKey("UserId")]
+    public int PublisherId { get; set; }
+    
+    public User PublisherUser { get; set; }
+    
     [ForeignKey("CompanyId")]
     public int? CompanyId { get; set; }
     public Company? Company { get; set; }
 
-    public ICollection<UserJobLike>? UserJobLikes { get; set; } = new List<UserJobLike>();
+    public ICollection<User> AppliedUsers { get; set; } = new List<User>();
 }

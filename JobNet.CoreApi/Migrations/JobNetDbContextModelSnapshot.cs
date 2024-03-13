@@ -16,7 +16,7 @@ namespace JobNet.CoreApi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.15")
+                .HasAnnotation("ProductVersion", "7.0.16")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Comment", b =>
@@ -201,15 +201,17 @@ namespace JobNet.CoreApi.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("JobEmployeeLevel")
-                        .HasColumnType("int");
+                    b.Property<string>("JobEmployeeLevel")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("JobTitle")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("JobType")
-                        .HasColumnType("int");
+                    b.Property<string>("JobType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Location")
                         .IsRequired()
@@ -218,9 +220,17 @@ namespace JobNet.CoreApi.Migrations
                     b.Property<DateTime>("PostedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("PublisherId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PublisherUserUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("JobId");
 
                     b.HasIndex("CompanyId");
+
+                    b.HasIndex("PublisherUserUserId");
 
                     b.ToTable("Jobs");
                 });
@@ -362,6 +372,9 @@ namespace JobNet.CoreApi.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int?>("JobId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Lastname")
                         .HasColumnType("longtext");
 
@@ -375,28 +388,9 @@ namespace JobNet.CoreApi.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("JobNet.CoreApi.Data.Entities.UserJobLike", b =>
-                {
-                    b.Property<int>("UserJobLikeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("JobId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserJobLikeId");
-
                     b.HasIndex("JobId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserJobLikes");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Comment", b =>
@@ -481,7 +475,15 @@ namespace JobNet.CoreApi.Migrations
                         .WithMany("CurrentAvailableJobs")
                         .HasForeignKey("CompanyId");
 
+                    b.HasOne("JobNet.CoreApi.Data.Entities.User", "PublisherUser")
+                        .WithMany()
+                        .HasForeignKey("PublisherUserUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Company");
+
+                    b.Navigation("PublisherUser");
                 });
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Like", b =>
@@ -525,26 +527,11 @@ namespace JobNet.CoreApi.Migrations
                         .WithMany("TalentManagers")
                         .HasForeignKey("CompanyId");
 
+                    b.HasOne("JobNet.CoreApi.Data.Entities.Job", null)
+                        .WithMany("AppliedUsers")
+                        .HasForeignKey("JobId");
+
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("JobNet.CoreApi.Data.Entities.UserJobLike", b =>
-                {
-                    b.HasOne("JobNet.CoreApi.Data.Entities.Job", "Job")
-                        .WithMany("UserJobLikes")
-                        .HasForeignKey("JobId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JobNet.CoreApi.Data.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Job");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Company", b =>
@@ -556,7 +543,7 @@ namespace JobNet.CoreApi.Migrations
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Job", b =>
                 {
-                    b.Navigation("UserJobLikes");
+                    b.Navigation("AppliedUsers");
                 });
 
             modelBuilder.Entity("JobNet.CoreApi.Data.Entities.Post", b =>

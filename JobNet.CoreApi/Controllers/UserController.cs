@@ -1,4 +1,5 @@
-﻿using JobNet.CoreApi.Data;
+﻿using System.Security.Claims;
+using JobNet.CoreApi.Data;
 using JobNet.CoreApi.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using JobNet.CoreApi.Data.Entities;
@@ -435,30 +436,38 @@ public class UserController : ControllerBase
         return Ok(createUserApiResponse);
     }
 
-    [HttpPatch("{userId:int}/work/{companyId:int}")]
-    public async Task<IActionResult> UpdateCompany([FromRoute] int userId, [FromRoute] int companyId)
+    [HttpPatch("work/{companyId:int}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateCompany([FromRoute] int companyId)
     {
-        var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            var userId = Convert.ToInt32(userIdClaim.Value);
+            
+            var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+            
         var company = await _dbContext.Companies.FirstOrDefaultAsync(u => u.CompanyId == companyId);
         
         if (user == null && company != null)
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            ProblemDetailResponse problemDetailResponse1 = new ProblemDetailResponse
             {
                 ProblemTitle = "Not Found",
                 ProblemDescription = $"User not found with id({userId})"
             };
-            return Ok(problemDetailResponse);
+            return Ok(problemDetailResponse1);
         }
         
         if (company == null && user != null)
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            ProblemDetailResponse problemDetailResponse2 = new ProblemDetailResponse
             {
                 ProblemTitle = "Not Found",
                 ProblemDescription = $"Company not found with id({companyId})"
             };
-            return Ok(problemDetailResponse);
+            return Ok(problemDetailResponse2);
         }
 
         if (user == null && company == null)
@@ -511,6 +520,18 @@ public class UserController : ControllerBase
         };
 
         return Ok(userSimpleWithCompanyApiResponse);
+            
+        }
+        
+        ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponse);
+        
+        
+        
     }
 
     [HttpPatch("{userId:int}/addSkill/{skillId:int}")]

@@ -10,9 +10,9 @@ public class JobDto
     
     public string Description { get; set; }
     
-    public JobType JobType { get; set; }
+    public string JobType { get; set; }
     
-    public JobEmployeeLevel JobEmployeeLevel { get; set; }
+    public string JobEmployeeLevel { get; set; }
     
     public string Location { get; set; }
     

@@ -6,13 +6,11 @@ namespace JobNet.CoreApi.Models.Request;
 
 public class CreateJobApiRequest
 {
-    public int JobId { get; set; }
-    
     public string JobTitle { get; set; }
     
-    public JobType JobType { get; set; }
+    public string JobType { get; set; }
     
-    public JobEmployeeLevel JobEmployeeLevel { get; set; }
+    public string JobEmployeeLevel { get; set; }
     
     public string Description { get; set; }
     
