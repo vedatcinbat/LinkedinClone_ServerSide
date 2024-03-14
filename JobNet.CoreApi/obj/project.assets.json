@@ -1788,11 +1788,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\vedat.cinbat\\Desktop\\JobNet_CoreApi\\JobNet\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
+      "projectUniqueName": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
       "projectName": "JobNet.CoreApi",
-      "projectPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNet_CoreApi\\JobNet\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
+      "projectPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
       "packagesPath": "C:\\Users\\vedat.cinbat\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNet_CoreApi\\JobNet\\JobNet.CoreApi\\obj\\",
+      "outputPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\vedat.cinbat\\AppData\\Roaming\\NuGet\\NuGet.Config",

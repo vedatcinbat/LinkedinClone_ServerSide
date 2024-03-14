@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("JobNet.CoreApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+acf07306ff4265ba12ffd67f1120f64c86e05d14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5e5908c73cb86ae7206fedd0a5cfa837d9aea54")]
 [assembly: System.Reflection.AssemblyProductAttribute("JobNet.CoreApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("JobNet.CoreApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
