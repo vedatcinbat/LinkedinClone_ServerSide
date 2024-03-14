@@ -24,3 +24,4 @@ Generated_Code/
 *.nuget.targets
 *.nuget.props
 
+appsettings.json
