@@ -534,10 +534,17 @@ public class UserController : ControllerBase
         
     }
 
-    [HttpPatch("{userId:int}/addSkill/{skillId:int}")]
-    public async Task<IActionResult> AddSkillToUser([FromRoute] int userId, [FromRoute] int skillId)
+    [HttpPatch("addSkill/{skillId:int}")]
+    public async Task<IActionResult> AddSkillToUser([FromRoute] int skillId)
     {
-        ProblemDetailResponse problemDetailResponse;
+        
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            ProblemDetailResponse problemDetailResponse;
+            
+            var userId = Convert.ToInt32(userIdClaim.Value);
         
         var user = await _dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
         
@@ -617,13 +624,27 @@ public class UserController : ControllerBase
         };
 
         return Ok(problemDetailResponse);
+        }
+        
+        ProblemDetailResponse problemDetailResponse2 = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponse2);
 
 
     }
-    [HttpPatch("{userId:int}/removeSkill/{skillId:int}")]
-    public async Task<IActionResult> RemoveSkillFromUser([FromRoute] int userId, [FromRoute] int skillId)
+    [HttpPatch("removeSkill/{skillId:int}")]
+    public async Task<IActionResult> RemoveSkillFromUser([FromRoute] int skillId)
     {
-        ProblemDetailResponse problemDetailResponse;
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            var userId = Convert.ToInt32(userIdClaim.Value);
+            
+            ProblemDetailResponse problemDetailResponse;
         
         var user = await _dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
         
@@ -702,28 +723,60 @@ public class UserController : ControllerBase
         };
 
         return Ok(problemDetailResponse);
+        }
+
+        ProblemDetailResponse problemDetailResponse2 = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponse2);
 
     }
 
     [HttpDelete("{userId:int}")]
     public async Task<IActionResult> DeleteUser([FromRoute] int userId)
     {
-        var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-        if (user == null)
+        if (userIdClaim != null)
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            var requestUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (requestUserId == userId)
             {
-                ProblemTitle = "Not Found",
-                ProblemDescription = $"User not found with id ({userId})"
+                var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null)
+                {
+                    ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                    {
+                        ProblemTitle = "Not Found",
+                        ProblemDescription = $"User not found with id ({userId})"
+                    };
+                    return Ok(problemDetailResponse);
+                }
+
+                user.IsDeleted = true;
+                await _dbContext.SaveChangesAsync();
+        
+                return Ok(user);
+            }
+            
+            ProblemDetailResponse problemDetailResponse3 = new ProblemDetailResponse
+            {
+                ProblemTitle = "User has no permission",
+                ProblemDescription = $"User({requestUserId}) can not delete user({userId}) "
             };
-            return Ok(problemDetailResponse);
+            return Ok(problemDetailResponse3);
         }
 
-        user.IsDeleted = true;
-        await _dbContext.SaveChangesAsync();
-        
-        return Ok(user);
+        ProblemDetailResponse problemDetailResponse2 = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponse2);
 
     }
     

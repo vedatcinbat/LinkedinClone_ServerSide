@@ -49,3 +49,4 @@ C:\Users\vedat.cinbat\Desktop\JobNet_CoreApi\JobNet\JobNet.CoreApi\obj\Debug\net
 C:\Users\vedat.cinbat\Desktop\JobNet_CoreApi\JobNet\JobNet.CoreApi\obj\Debug\net8.0\JobNet.CoreApi.pdb
 C:\Users\vedat.cinbat\Desktop\JobNet_CoreApi\JobNet\JobNet.CoreApi\obj\Debug\net8.0\JobNet.CoreApi.genruntimeconfig.cache
 C:\Users\vedat.cinbat\Desktop\JobNet_CoreApi\JobNet\JobNet.CoreApi\obj\Debug\net8.0\ref\JobNet.CoreApi.dll
+C:\Users\vedat.cinbat\Desktop\JobNet_CoreApi\JobNet\JobNet.CoreApi\obj\Debug\net8.0\JobNet.CoreApi.sourcelink.json

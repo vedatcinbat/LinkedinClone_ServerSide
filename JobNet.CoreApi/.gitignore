@@ -6,6 +6,7 @@
 *.suo
 *.cache
 *.log
+*.json
 *.vscode
 /.vs
 /.idea
