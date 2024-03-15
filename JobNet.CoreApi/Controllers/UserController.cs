@@ -275,13 +275,13 @@ public class UserController : ControllerBase
                         ProfilePictureUrl = like.User.ProfilePictureUrl,
                         IsDeleted = like.User.IsDeleted,
                         CompanyId = like.User.CompanyId,
-                        Company = new UserPostCompanySimpleResponse
+                        Company = like.User.Company != null ? new UserPostCompanySimpleResponse
                         {
                             CompanyId = like.User.Company.CompanyId,
                             CompanyName = like.User.Company.CompanyName,
                             Industry = like.User.Company.Industry,
                             LogoUrl = like.User.Company.LogoUrl
-                        }
+                        } : null,
                     }
                 }).ToList()
             }).ToList()
@@ -506,17 +506,17 @@ public class UserController : ControllerBase
             AboutMe = userResponse.AboutMe,
             IsDeleted = userResponse.IsDeleted,
             CompanyId = userResponse.CompanyId,
-            Company =  new UserCompanySimpleResponse
-                {
-                    CompanyId = company.CompanyId,
-                    CompanyName = company.CompanyName,
-                    Industry = company.Industry,
-                    Description = company.Description,
-                    EmployeeCount = company.EmployeeCount,
-                    WebsiteUrl = company.WebsiteUrl,
-                    LogoUrl = company.LogoUrl,
-                    FoundedAt = company.FoundedAt
-                }
+            Company =  userResponse.Company != null ? new UserCompanySimpleResponse
+            {
+                CompanyId = company.CompanyId,
+                CompanyName = company.CompanyName,
+                Industry = company.Industry,
+                Description = company.Description,
+                EmployeeCount = company.EmployeeCount,
+                WebsiteUrl = company.WebsiteUrl,
+                LogoUrl = company.LogoUrl,
+                FoundedAt = company.FoundedAt
+            } : null,
         };
 
         return Ok(userSimpleWithCompanyApiResponse);
@@ -529,8 +529,6 @@ public class UserController : ControllerBase
             ProblemDescription = $"You have to authenticate first !"
         };
         return Ok(problemDetailResponse);
-        
-        
         
     }
 
