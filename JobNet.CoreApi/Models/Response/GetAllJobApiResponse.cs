@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using JobNet.CoreApi.Data.Entities;
 
 namespace JobNet.CoreApi.Models.Response;
 
-public class GetJobsApiResponse
+public class GetAllJobApiResponse
 {
     public int JobId { get; set; }
     
@@ -22,7 +21,7 @@ public class GetJobsApiResponse
     
     [ForeignKey("CompanyId")]
     public int? CompanyId { get; set; }
-    public GetCompanyApiResponse? Company { get; set; }
+    public GetCompanyWithoutJobsAndTalentManagersApiResponse? Company { get; set; }
 
-    public ICollection<UserSimpleWithSimpleCompanyResponse>? AppliedUsers { get; set; } = new List<UserSimpleWithSimpleCompanyResponse>();
+    public int AplliedUserCount { get; set; }
 }

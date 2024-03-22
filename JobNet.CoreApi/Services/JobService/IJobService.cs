@@ -7,4 +7,7 @@ namespace JobNet.CoreApi.Services.JobService;
 public interface IJobService
 {
     Task<List<Job>> GetAllJobs();
+    Task<Job?> GetJobById(int jobId);
+    Task<Job?> ApplyJobWithUserIdAndJobId(int userId, int jobId);
+    
 }

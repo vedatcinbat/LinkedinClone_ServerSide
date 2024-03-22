@@ -23,7 +23,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
     {
         List<Post> posts = await _postService.GetAllPosts();
         
-        var postSimpleApiResponses = posts.Select(post => new PostSimpleApiResponse
+        var postSimpleApiResponses = posts.Select(post => new GetAllPostSimpleResponse()
         {
             PostId = post.PostId,
             IsDeleted = post.IsDeleted,
@@ -55,49 +55,6 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
             ImagesContent = post.ImagesContent,
             CommentCount = post.Comments.Count(),
             LikeCount = post.Likes.Count(),
-            Comments = post.Comments != null
-                ? post.Comments 
-                    .Select(comment => new PostCommentSimpleApiResponse
-                    {
-                        CommentId = comment.CommentId,
-                        Content = comment.Content,
-                        CommentedAt = comment.CommentedAt,
-                        UserCommentSimpleResponse = comment.User != null ? new UserCommentSimpleResponse
-                        {
-                            UserId = comment.User.UserId,
-                            Firstname = comment.User.Firstname,
-                            Lastname = comment.User.Lastname,
-                            Title = comment.User.Title,
-                            ProfilePictureUrl = comment.User.ProfilePictureUrl,
-                            IsDeleted = comment.User.IsDeleted
-                        } : null,
-                    }).ToList()
-                : null,
-            Likes = post.Likes
-                .Select(like => new LikeSimpleResponse
-                {
-                    LikeId = like.LikeId,
-                    IsDeleted = like.IsDeleted,
-                    UserId = like.UserId,
-                    User = new UserPostSimpleResponse
-                    {
-                        UserId = like.User.UserId,
-                        Firstname = like.User.Firstname,
-                        Lastname = like.User.Lastname,
-                        Title = like.User.Title,
-                        ProfilePictureUrl = like.User.ProfilePictureUrl,
-                        IsDeleted = like.User.IsDeleted,
-                        CompanyId = like.User.CompanyId,
-                        Company = like.User.Company != null ? new UserPostCompanySimpleResponse
-                        {
-                            CompanyId = like.User.Company.CompanyId,
-                            CompanyName = like.User.Company.CompanyName,
-                            Industry = like.User.Company.Industry,
-                            LogoUrl = like.User.Company.LogoUrl
-                        } : null
-                    }
-                })
-                .ToList(),
         }).ToList();
 
         return Ok(postSimpleApiResponses);
@@ -197,10 +154,8 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
         };
         
         return Ok(postSimpleApiResponse);
-        
     }
     
-
     [HttpPost("/createPost")]
     [Authorize]
     public async Task<IActionResult> CreatePost(CreatePostApiRequest createPostApiRequest)

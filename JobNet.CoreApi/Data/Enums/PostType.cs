@@ -2,7 +2,9 @@
 
 public enum PostType
 {
-    Text,
-    Image,
-    ImageList,
+    Text = 0,
+    Image = 1,
+    ImageList = 2,
+    TextImage = 3,
+    TextImages = 4,
 }

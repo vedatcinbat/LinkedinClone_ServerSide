@@ -8,7 +8,7 @@ public class CreatePostApiRequest
 {
     public string Caption { get; set; }
 
-    public PostType PostType;
+    public PostType PostType { get; set; }
     
     public string? TextContent { get; set; }
     

@@ -45,8 +45,6 @@ public class PostService : IPostService
             .ThenInclude(l => l.User)
             .ThenInclude(u => u.Company)
             .FirstOrDefaultAsync(p => p.PostId == postId);
-
-
         return post;
     }
 
