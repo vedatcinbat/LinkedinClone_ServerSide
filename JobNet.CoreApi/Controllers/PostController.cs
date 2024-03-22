@@ -197,7 +197,6 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
             return Ok(problemDetailResponse);
         }
         
-        // Get UserId from JWT:
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
         if (userIdClaim != null)

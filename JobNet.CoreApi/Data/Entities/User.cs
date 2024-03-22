@@ -37,7 +37,6 @@ namespace JobNet.CoreApi.Data.Entities
         [ForeignKey("CompanyId")]
         public Company? Company { get; set; }
         
-        // Collections
         public ICollection<Post> Posts { get; set; } = new List<Post>();
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();

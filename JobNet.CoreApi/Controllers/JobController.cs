@@ -197,7 +197,6 @@ public class JobController : ControllerBase
     [Authorize]
     public async Task<IActionResult> CreateJob([FromBody] CreateJobApiRequest createJobApiRequest)
     {
-        // Who is requesting this ? Find the user
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
         if (userIdClaim != null)
