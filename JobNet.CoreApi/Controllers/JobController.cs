@@ -176,7 +176,7 @@ public class JobController : ControllerBase
         {
             var userId = Convert.ToInt32(userIdClaim.Value);
 
-            User user = await _dbContext.Users.Where(user => user.IsDeleted == false)
+            var user = await _dbContext.Users.Where(user => user.IsDeleted == false)
                 .FirstOrDefaultAsync(user => user.UserId == userId);
 
             var company =

@@ -1,10 +1,14 @@
-﻿using JobNet.CoreApi.Services;
+﻿using System.Security.Claims;
+using JobNet.CoreApi.Models.Response.Problem;
+using JobNet.CoreApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobNet.CoreApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class LikeController : ControllerBase
 {
     private readonly ILikeService _likeService;
@@ -18,16 +22,70 @@ public class LikeController : ControllerBase
     [HttpPatch("{userId:int}/like/{postId:int}")]
     public async Task<IActionResult> LikePost([FromRoute] int userId, [FromRoute] int postId)
     {
-        var res = await _likeService.LikePostWithUserIdAndPostId(userId, postId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-        return Ok(res);
+        if (userIdClaim != null)
+        {
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (currentUserId == userId)
+            {
+                var res = await _likeService.LikePostWithUserIdAndPostId(userId, postId);
+
+                return Ok(res);
+            }
+
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "User has no permission",
+                ProblemDescription = $"You User({currentUserId}) cant like post as User({userId})"
+            };
+
+            return Ok(problemDetailResponse);
+        }
+        
+        ProblemDetailResponse problemDetailResponseNotFound = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authorize first!"
+        };
+
+        return Ok(problemDetailResponseNotFound);
+
+        
     }
     
     [HttpPatch("{userId:int}/unlike/{postId:int}")]
     public async Task<IActionResult> UnLikePost([FromRoute] int userId, [FromRoute] int postId)
     {
-        var res = await _likeService.UnlikePostWithUserIdAndPostId(userId, postId);
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-        return Ok(res);
+        if (userIdClaim != null)
+        {
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (currentUserId == userId)
+            {
+                var res = await _likeService.UnlikePostWithUserIdAndPostId(userId, postId);
+
+                return Ok(res);
+            }
+
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "User has no permission",
+                ProblemDescription = $"You User({currentUserId}) cant like post as User({userId})"
+            };
+
+            return Ok(problemDetailResponse);
+        }
+        
+        ProblemDetailResponse problemDetailResponseNotFound = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authorize first!"
+        };
+
+        return Ok(problemDetailResponseNotFound);
     }
 }

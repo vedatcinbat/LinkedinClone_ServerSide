@@ -88,13 +88,13 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
                         ProfilePictureUrl = like.User.ProfilePictureUrl,
                         IsDeleted = like.User.IsDeleted,
                         CompanyId = like.User.CompanyId,
-                        Company = new UserPostCompanySimpleResponse
+                        Company = like.User.Company != null ? new UserPostCompanySimpleResponse
                         {
                             CompanyId = like.User.Company.CompanyId,
                             CompanyName = like.User.Company.CompanyName,
                             Industry = like.User.Company.Industry,
                             LogoUrl = like.User.Company.LogoUrl
-                        }
+                        } : null
                     }
                 })
                 .ToList(),
@@ -184,13 +184,13 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
                         ProfilePictureUrl = like.User.ProfilePictureUrl,
                         IsDeleted = like.User.IsDeleted,
                         CompanyId = like.User.CompanyId,
-                        Company = new UserPostCompanySimpleResponse
+                        Company = like.User.Company != null ? new UserPostCompanySimpleResponse
                         {
                             CompanyId = like.User.Company.CompanyId,
                             CompanyName = like.User.Company.CompanyName,
                             Industry = like.User.Company.Industry,
                             LogoUrl = like.User.Company.LogoUrl
-                        }
+                        } : null
                     }
                 })
                 .ToList(),
