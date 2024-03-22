@@ -755,6 +755,26 @@ public class UserController : ControllerBase
                     return Ok(problemDetailResponse);
                 }
 
+                
+                List<Like> userLikeRecords = await _dbContext.Likes.Where(l => l.IsDeleted == false && l.UserId == userId).ToListAsync();
+                List<Comment> userComments = await _dbContext.Comments
+                    .Where(c => c.IsDeleted == false && c.UserId == userId).ToListAsync();
+                List<Follow> followRecords = await _dbContext.Follows.Where(f =>
+                    f.IsDeleted == false && (f.FollowerId == userId || f.FollowingId == userId)).ToListAsync();
+                
+                foreach (var comment in userComments)
+                {
+                    comment.IsDeleted = true;
+                }
+                foreach (var like in userLikeRecords)
+                {
+                    like.IsDeleted = true;
+                }
+                foreach (var follow in followRecords)
+                {
+                    follow.IsDeleted = true;
+                }
+                
                 user.IsDeleted = true;
                 await _dbContext.SaveChangesAsync();
         
@@ -776,6 +796,51 @@ public class UserController : ControllerBase
         };
         return Ok(problemDetailResponse2);
 
+    }
+
+    [HttpPatch("saveAccount")]
+    public async Task<IActionResult> ReCreateAccount(SaveAccountApiRequest saveAccountApiRequest)
+    {
+        var user = await _userService.SaveAccount(saveAccountApiRequest.Email, saveAccountApiRequest.Password);
+
+        if (user == null)
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = $"User Record Could Not Fonud",
+                ProblemDescription = $"User Record Could Not Found Email({saveAccountApiRequest.Email})"
+            };
+            return Ok(problemDetailResponse);
+        }
+
+        UserSimpleApiResponse userSimpleApiResponse = new UserSimpleApiResponse
+        {
+            UserId = user.UserId,
+            Firstname = user.Firstname,
+            Lastname = user.Lastname,
+            Title = user.Title,
+            HashedPassword = user.HashedPassword,
+            Email = user.Email,
+            Age = user.Age,
+            Country = user.Country,
+            CurrentLanguage = user.CurrentLanguage,
+            ProfilePictureUrl = user.ProfilePictureUrl,
+            AboutMe = user.AboutMe,
+            CompanyId = user.CompanyId,
+            Company = user.Company != null ? new UserCompanySimpleResponse
+            {
+                CompanyId = user.Company.CompanyId,
+                CompanyName = user.Company.CompanyName,
+                Industry = user.Company.Industry,
+                Description = user.Company.Description,
+                EmployeeCount = user.Company.EmployeeCount,
+                WebsiteUrl = user.Company.WebsiteUrl,
+                LogoUrl = user.Company.LogoUrl,
+                FoundedAt = user.Company.FoundedAt
+            } : null,
+        };
+        
+        return Ok(userSimpleApiResponse);
     }
     
 }

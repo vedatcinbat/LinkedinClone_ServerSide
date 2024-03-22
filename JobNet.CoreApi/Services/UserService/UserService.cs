@@ -156,6 +156,41 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         return user;
     }
 
+    public async Task<User?> SaveAccount(string email, string password)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(user =>
+            user.IsDeleted == true && user.Email == email && user.HashedPassword == password);
+        if (user != null)
+        {
+            var userLikes = await dbContext.Likes.Where(l => l.User.UserId == user.UserId).ToListAsync();
+            var userComments = await dbContext.Comments.Where(c => c.User.UserId == user.UserId).ToListAsync();
+            var userFollows = await dbContext.Follows
+                .Where(f => f.IsDeleted == true && (f.FollowerId == user.UserId || f.FollowingId == user.UserId))
+                .ToListAsync();
+            
+            
+            foreach (var comment in userComments)
+            {
+                comment.IsDeleted = false;
+            }
+            foreach (var like in userLikes)
+            {
+                like.IsDeleted = false;
+            }
+            foreach (var follow in userFollows)
+            {
+                follow.IsDeleted = false;
+            }
+            
+            user.IsDeleted = false;
+            await dbContext.SaveChangesAsync();
+
+            return user;
+        }
+
+        return null;
+    }
+
     private bool VerifyPasswordHash(string password, string storedHash)
     {
         if (password == storedHash) return true;

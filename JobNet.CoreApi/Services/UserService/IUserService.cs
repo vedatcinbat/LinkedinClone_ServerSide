@@ -29,5 +29,7 @@ public interface IUserService
     Task<User?> GetUserSkill(int userId);
     
     Task<User> Authenticate(string email, string password);
-    
+
+    Task<User?> SaveAccount(string email, string password);
+
 }
