@@ -15,21 +15,12 @@ namespace JobNet.CoreApi.Controllers;
 
 [ApiController]
 [Route("/api/users")]
-public class UserController : ControllerBase
+public class UserController(IUserService userService, JobNetDbContext dbContext) : ControllerBase
 {
-    private IUserService _userService;
-    private JobNetDbContext _dbContext;
-
-    public UserController(IUserService userService, JobNetDbContext dbContext)
-    {
-        this._userService = userService;
-        _dbContext = dbContext;
-    }
-    
     [HttpGet("allUsers")]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _userService.GetAllUsers();
+        var users = await userService.GetAllUsers();
 
         List<UserSimpleApiResponse> userSimpleApiResponses = users.Select(user => new UserSimpleApiResponse
         {
@@ -64,7 +55,7 @@ public class UserController : ControllerBase
     [HttpGet("allActiveUsers")]
     public async Task<IActionResult> GetAllUsersActive()
     {
-        var users = await _userService.GetAllUsersActive();
+        var users = await userService.GetAllUsersActive();
         
         List<UserSimpleApiResponse> userSimpleApiResponses = users.Select(user => new UserSimpleApiResponse
         {
@@ -101,7 +92,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/profile")]
     public async Task<IActionResult> GetOneUserProfileInDetails([FromRoute] int userId)
     {
-        var user = await _userService.GetOneUserProfileDetails(userId);
+        var user = await userService.GetOneUserProfileDetails(userId);
         
         if (user == null)
         {
@@ -114,9 +105,9 @@ public class UserController : ControllerBase
         }
 
         
-        int followerCount = await _dbContext.Follows.Where(f => f.IsDeleted == false && f.FollowingId == userId).CountAsync();
+        int followerCount = await dbContext.Follows.Where(f => f.IsDeleted == false && f.FollowingId == userId).CountAsync();
 
-        int followingCount = await _dbContext.Follows.Where(f => f.IsDeleted == false && f.FollowerId == userId).CountAsync();
+        int followingCount = await dbContext.Follows.Where(f => f.IsDeleted == false && f.FollowerId == userId).CountAsync();
         
         
         UserProfileApiResponse userProfileApiResponse = new UserProfileApiResponse
@@ -171,7 +162,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/simple")]
     public async Task<IActionResult> GetOneUserSimpleDetails([FromRoute] int userId)
     {
-        var user = await _userService.GetOneUserSimpleDetails(userId);
+        var user = await userService.GetOneUserSimpleDetails(userId);
 
         if (user == null)
         {
@@ -216,7 +207,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/getPosts")]
     public async Task<IActionResult> GetOneUserPostsWithUserId([FromRoute] int userId)
     {
-        var user = await _userService.GetOneUserPostsWithUserId(userId);
+        var user = await userService.GetOneUserPostsWithUserId(userId);
 
         if (user == null)
         {
@@ -293,7 +284,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/followers")]
     public async Task<IActionResult> GetOneUserFollowers([FromRoute] int userId)
     {
-        var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
         
         if (user == null)
         {
@@ -306,7 +297,7 @@ public class UserController : ControllerBase
         }
         
         
-        var followers = await _userService.GetFollowers(userId);
+        var followers = await userService.GetFollowers(userId);
         
         var followersSimple = followers.Select(user => new UserFollowerSimpleApiResponse
         {
@@ -339,7 +330,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/followings")]
     public async Task<IActionResult> GetOneUserFollowings([FromRoute] int userId)
     {
-        var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
         {
@@ -351,7 +342,7 @@ public class UserController : ControllerBase
             return Ok(problemDetailResponse);
         }
         
-        var followings = await _userService.GetFollowings(userId);
+        var followings = await userService.GetFollowings(userId);
         
         var followingsSimple = followings.Select(user => new UserFollowerSimpleApiResponse
         {
@@ -383,7 +374,7 @@ public class UserController : ControllerBase
     [HttpGet("{userId:int}/getSkills")]
     public async Task<IActionResult> GetOneUsersSkills([FromRoute] int userId)
     {
-        var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
 
         if (user == null)
         {
@@ -395,7 +386,7 @@ public class UserController : ControllerBase
             return Ok(problemDetailResponse);
         }
         
-        var userResponse = await _userService.GetUserSkill(userId);
+        var userResponse = await userService.GetUserSkill(userId);
         
         UserSkillSimpleApiResponse userSkillSimpleApiResponse = new UserSkillSimpleApiResponse
         {
@@ -413,7 +404,7 @@ public class UserController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateUserApiResponse))]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserApiRequest createUserApiRequest)
     {
-        var user = await _userService.CreateUser(createUserApiRequest);
+        var user = await userService.CreateUser(createUserApiRequest);
         
         CreateUserApiResponse createUserApiResponse = new CreateUserApiResponse
         {
@@ -446,9 +437,9 @@ public class UserController : ControllerBase
         {
             var userId = Convert.ToInt32(userIdClaim.Value);
             
-            var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+            var user = await dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
             
-        var company = await _dbContext.Companies.FirstOrDefaultAsync(u => u.CompanyId == companyId);
+        var company = await dbContext.Companies.FirstOrDefaultAsync(u => u.CompanyId == companyId);
         
         if (user == null && company != null)
         {
@@ -493,7 +484,7 @@ public class UserController : ControllerBase
         }
         
         
-        var userResponse = await _userService.UpdateUserCompanyWithId(userId, companyId);
+        var userResponse = await userService.UpdateUserCompanyWithId(userId, companyId);
         
 
         UserSimpleWithCompanyApiResponse userSimpleWithCompanyApiResponse = new UserSimpleWithCompanyApiResponse
@@ -544,9 +535,9 @@ public class UserController : ControllerBase
             
             var userId = Convert.ToInt32(userIdClaim.Value);
         
-        var user = await _dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
         
-        var skill = await _dbContext.Skills.FirstOrDefaultAsync(s => s.SkillId == skillId);
+        var skill = await dbContext.Skills.FirstOrDefaultAsync(s => s.SkillId == skillId);
         
         if (user == null && skill != null)
         {
@@ -594,7 +585,7 @@ public class UserController : ControllerBase
         if (!isSkillAlreadyAdded)
         {
             user.Skills.Add(skill);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         
             var userSkillAddedApiResponse = new UserSkillAddedApiResponse
             {
@@ -644,9 +635,9 @@ public class UserController : ControllerBase
             
             ProblemDetailResponse problemDetailResponse;
         
-        var user = await _dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
+        var user = await dbContext.Users.Include(user => user!.Skills).FirstOrDefaultAsync(u => u.UserId == userId);
         
-        var skill = await _dbContext.Skills.FirstOrDefaultAsync(s => s.SkillId == skillId);
+        var skill = await dbContext.Skills.FirstOrDefaultAsync(s => s.SkillId == skillId);
         
         if (user == null && skill != null)
         {
@@ -694,7 +685,7 @@ public class UserController : ControllerBase
         if (isThisUserHasSkill)
         {
             user.Skills.Remove(skill);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         
             var userSkillRemovedApiResponse = new UserSkillRemovedApiResponse()
             {
@@ -743,7 +734,7 @@ public class UserController : ControllerBase
 
             if (requestUserId == userId)
             {
-                var user = await _dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+                var user = await dbContext.Users.Where(u => u.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
 
                 if (user == null)
                 {
@@ -756,10 +747,10 @@ public class UserController : ControllerBase
                 }
 
                 
-                List<Like> userLikeRecords = await _dbContext.Likes.Where(l => l.IsDeleted == false && l.UserId == userId).ToListAsync();
-                List<Comment> userComments = await _dbContext.Comments
+                List<Like> userLikeRecords = await dbContext.Likes.Where(l => l.IsDeleted == false && l.UserId == userId).ToListAsync();
+                List<Comment> userComments = await dbContext.Comments
                     .Where(c => c.IsDeleted == false && c.UserId == userId).ToListAsync();
-                List<Follow> followRecords = await _dbContext.Follows.Where(f =>
+                List<Follow> followRecords = await dbContext.Follows.Where(f =>
                     f.IsDeleted == false && (f.FollowerId == userId || f.FollowingId == userId)).ToListAsync();
                 
                 foreach (var comment in userComments)
@@ -776,7 +767,7 @@ public class UserController : ControllerBase
                 }
                 
                 user.IsDeleted = true;
-                await _dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
         
                 return Ok(user);
             }
@@ -801,7 +792,7 @@ public class UserController : ControllerBase
     [HttpPatch("saveAccount")]
     public async Task<IActionResult> ReCreateAccount(SaveAccountApiRequest saveAccountApiRequest)
     {
-        var user = await _userService.SaveAccount(saveAccountApiRequest.Email, saveAccountApiRequest.Password);
+        var user = await userService.SaveAccount(saveAccountApiRequest.Email, saveAccountApiRequest.Password);
 
         if (user == null)
         {
