@@ -35,7 +35,7 @@ public class UserProfileApiResponse
 
     public ICollection<Experience>? Experiences { get; set; }
 
-    public ICollection<Education>? Educations { get; set; }
+    public ICollection<UserEducationResponseWithoutUserResponse>? Educations { get; set; }
 
     public ICollection<Skill>? Skills { get; set; }
     

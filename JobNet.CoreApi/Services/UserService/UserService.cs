@@ -34,6 +34,7 @@ public class UserService(JobNetDbContext dbContext) : IUserService
                     .ThenInclude(p => p.Comments.Where(comment => comment.IsDeleted == false))
                 .Include(u => u.Experiences)
                 .Include(u => u.Educations)
+                .ThenInclude(e => e.School)
                 .Include(u => u.Skills)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -137,6 +138,31 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         
         return user;
     }
+
+    public async Task<User> AddSchoolToUser(User user, School school, UserEducationApiRequest userEducationApiRequest)
+    {
+        int educationId = await dbContext.Educations.CountAsync() + 1;
+
+        Education education = new Education
+        {
+            EducationId = educationId,
+            Degree = userEducationApiRequest.Degree,
+            FieldOfStudy = userEducationApiRequest.FieldOfStudy,
+            StartDate = userEducationApiRequest.StartDate,
+            EndDate = userEducationApiRequest.EndDate,
+            UserId = user.UserId,
+            User = user,
+            SchoolId = school.SchoolId,
+            School = school
+        };
+        
+        await dbContext.Educations.AddAsync(education);
+        school.Graduates.Add(user);
+        await dbContext.SaveChangesAsync();
+
+        return user;
+    }
+
 
     public async Task<User?> GetUserSkill(int userId)
     {

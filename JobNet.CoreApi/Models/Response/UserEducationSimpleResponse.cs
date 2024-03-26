@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using JobNet.CoreApi.Models.Request;
 
-namespace JobNet.CoreApi.Data.Entities;
+namespace JobNet.CoreApi.Models.Response;
 
-public class Education
+public class UserEducationSimpleResponse
 {
-    public int EducationId { get; set; }
-    
     public string Degree { get; set; }
     
     public string FieldOfStudy { get; set; }
@@ -16,9 +15,10 @@ public class Education
     
     [ForeignKey("UserId")]
     public int UserId { get; set; }
-    public User User { get; set; }
+    public UserSimpleWithCompanyApiResponse user { get; set; }
     
     [ForeignKey("SchoolId")]
     public int SchoolId { get; set; }
-    public School School { get; set; }
+    
+    public GetAllSchoolsResponse School { get; set; }
 }

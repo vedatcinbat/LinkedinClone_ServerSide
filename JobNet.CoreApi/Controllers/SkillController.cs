@@ -11,12 +11,11 @@ namespace JobNet.CoreApi.Controllers;
 [Route("/api/[controller]")]
 public class SkillController(JobNetDbContext dbContext) : ControllerBase
 {
-    private readonly JobNetDbContext _dbContext = dbContext;
 
     [HttpGet("allSkills")]
     public async Task<IActionResult> GetAllSkills()
     {
-        List<Skill> skills = await _dbContext.Skills.ToListAsync();
+        List<Skill> skills = await dbContext.Skills.ToListAsync();
         
         return Ok(skills);
     }
@@ -24,7 +23,7 @@ public class SkillController(JobNetDbContext dbContext) : ControllerBase
     [HttpPost("addSkill")]
     public async Task<IActionResult> CreateSkill([FromQuery] AddSkillApiRequest addSkillApiRequest)
     {
-        var skillId = await _dbContext.Skills.CountAsync() + 1;
+        var skillId = await dbContext.Skills.CountAsync() + 1;
 
         Skill skill = new Skill()
         {
@@ -33,8 +32,8 @@ public class SkillController(JobNetDbContext dbContext) : ControllerBase
             SkillIndustry = addSkillApiRequest.SkillIndustry
         };
 
-        await _dbContext.Skills.AddAsync(skill);
-        await _dbContext.SaveChangesAsync();
+        await dbContext.Skills.AddAsync(skill);
+        await dbContext.SaveChangesAsync();
 
         return Ok($"Skill added successfully : {skill.SkillId} {skill.SkillName}");
 

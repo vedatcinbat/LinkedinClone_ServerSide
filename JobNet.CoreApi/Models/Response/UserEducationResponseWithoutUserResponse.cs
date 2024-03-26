@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace JobNet.CoreApi.Data.Entities;
+namespace JobNet.CoreApi.Models.Response;
 
-public class Education
+public class UserEducationResponseWithoutUserResponse
 {
-    public int EducationId { get; set; }
-    
     public string Degree { get; set; }
     
     public string FieldOfStudy { get; set; }
@@ -14,11 +12,8 @@ public class Education
     
     public DateTime EndDate { get; set; }
     
-    [ForeignKey("UserId")]
-    public int UserId { get; set; }
-    public User User { get; set; }
-    
     [ForeignKey("SchoolId")]
     public int SchoolId { get; set; }
-    public School School { get; set; }
+    
+    public GetAllSchoolsResponse School { get; set; }
 }

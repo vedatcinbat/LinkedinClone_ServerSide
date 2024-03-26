@@ -1,6 +1,6 @@
-﻿namespace JobNet.CoreApi.Data.Entities;
+﻿namespace JobNet.CoreApi.Models.Response;
 
-public class School
+public class GetAllSchoolsResponse
 {
     public int SchoolId { get; set; }
     
@@ -10,5 +10,5 @@ public class School
     
     public DateTime EstablishedAt { get; set; }
     
-    public List<User> Graduates { get; set; } = new List<User>();
+    public int? GraduatesCount { get; set; }
 }

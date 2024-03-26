@@ -2,7 +2,7 @@
 
 public enum CompanyIndustry
 {
-    InformationTechnologyAndServices,
+    InformationTechnologyAndServices = 1,
     ComputerSoftware,
     FinancialServices,
     Banking,

@@ -151,7 +151,22 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
                 LikeCount = post.LikeCount,
             }).ToList(),
             Experiences = user.Experiences,
-            Educations = user.Educations,
+            Educations = user.Educations.Select(education => new UserEducationResponseWithoutUserResponse
+            {
+                Degree = education.Degree,
+                FieldOfStudy = education.FieldOfStudy,
+                StartDate = education.StartDate,
+                EndDate = education.EndDate,
+                SchoolId = education.SchoolId,
+                School = new GetAllSchoolsResponse
+                {
+                    SchoolId = education.School.SchoolId,
+                    SchoolName = education.School.SchoolName,
+                    Location = education.School.Location,
+                    EstablishedAt = education.School.EstablishedAt,
+                    GraduatesCount = education.School.Graduates.Count()
+                }
+            }).ToList(),
             Skills = user.Skills,
 
         };
@@ -624,6 +639,105 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
 
 
     }
+
+    [HttpPost("{userId:int}/education/{schoolId:int}")]
+
+    public async Task<IActionResult> UpdateUserEducation([FromRoute] int userId,[FromRoute] int schoolId, [FromBody] UserEducationApiRequest userEducationApiRequest)
+    {
+        var currentUserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (currentUserIdClaim != null)
+        {
+            var currentUserId = Convert.ToInt32(currentUserIdClaim.Value);
+
+            var user = await dbContext.Users.Where(u => u.IsDeleted == false)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (currentUserId != userId)
+            {
+                ProblemDetailResponse problemDetailResponseUserHasNoPermission = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User has no permission",
+                    ProblemDescription = $"User({currentUserId}) has no permission to update user({userId}) profile"
+                };
+                return Ok(problemDetailResponseUserHasNoPermission);
+            }
+            
+            if (user == null)
+            {
+                ProblemDetailResponse problemDetailResponseUserNull = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User not found",
+                    ProblemDescription = $"User not found with id({userId})"
+                };
+                return Ok(problemDetailResponseUserNull);
+            }
+
+            var school = await dbContext.Schools.FirstOrDefaultAsync(s => s.SchoolId == schoolId);
+
+            if (school == null)
+            {
+                ProblemDetailResponse problemDetailResponseSchoolNotFound = new ProblemDetailResponse
+                {
+                    ProblemTitle = "School not found",
+                    ProblemDescription = $"School not found with id({school})"
+                };
+                return Ok(problemDetailResponseSchoolNotFound);
+            }
+            
+            var userResponse = await userService.AddSchoolToUser(user, school, userEducationApiRequest);
+
+            GetUserWithEducationResponse getUserWithEducationResponse = new GetUserWithEducationResponse
+            {
+                UserId = userResponse.UserId,
+                Firstname = userResponse.Firstname,
+                Lastname = userResponse.Lastname,
+                Title = userResponse.Title,
+                ProfilePictureUrl = userResponse.ProfilePictureUrl,
+                AboutMe = userResponse.AboutMe,
+                IsDeleted = userResponse.IsDeleted,
+                Company = userResponse.Company != null ? new GetCompanyForUserSchoolResponse
+                {
+                    CompanyId = userResponse.Company.CompanyId,
+                    CompanyName = userResponse.Company.CompanyName,
+                    Industry = userResponse.Company.Industry,
+                    Description = userResponse.Company.Description,
+                    WebsiteUrl = userResponse.Company.WebsiteUrl,
+                    LogoUrl = userResponse.Company.LogoUrl,
+                    FoundedAt = userResponse.Company.FoundedAt
+                } : null,
+                Educations = userResponse.Educations.Select(education => new UserEducationResponseWithoutUserResponse
+                {
+                    Degree = education.Degree,
+                    FieldOfStudy = education.FieldOfStudy,
+                    StartDate = education.StartDate,
+                    EndDate = education.EndDate,
+                    SchoolId = education.SchoolId,
+                    School = new GetAllSchoolsResponse
+                    {
+                        SchoolId = education.School.SchoolId,
+                        SchoolName = education.School.SchoolName,
+                        Location = education.School.Location,
+                        EstablishedAt = education.School.EstablishedAt,
+                        GraduatesCount = education.School.Graduates.Count()
+                    }
+                }).ToList()
+            };
+
+            return Ok(getUserWithEducationResponse);
+
+
+        }
+        
+        ProblemDetailResponse problemDetailResponseNotAuthenticated = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponseNotAuthenticated);
+        
+    }
+
     [HttpPatch("removeSkill/{skillId:int}")]
     public async Task<IActionResult> RemoveSkillFromUser([FromRoute] int skillId)
     {

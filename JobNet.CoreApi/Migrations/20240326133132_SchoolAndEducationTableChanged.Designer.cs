@@ -3,6 +3,7 @@ using System;
 using JobNet.CoreApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobNet.CoreApi.Migrations
 {
     [DbContext(typeof(JobNetDbContext))]
-    partial class JobNetDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240326133132_SchoolAndEducationTableChanged")]
+    partial class SchoolAndEducationTableChanged
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
