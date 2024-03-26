@@ -385,6 +385,57 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
         
         return Ok(followingsSimple);
     }
+
+    [HttpGet("{userId:int}/getEducations")]
+    public async Task<IActionResult> GetOneUserEducations([FromRoute] int userId)
+    {
+        var user = await dbContext.Users
+            .Where(u => u.IsDeleted == false)
+            .Include(user => user.Educations)
+            .ThenInclude(education => education.School)
+            .ThenInclude(school => school.Graduates)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
+        
+        if (user == null)
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "Not Found",
+                ProblemDescription = $"User not found with id({userId})"
+            };
+            return Ok(problemDetailResponse);
+        }
+
+        var userWithEducationsResponse = new GetUserEducationsResponse
+        {
+            UserId = user.UserId,
+            Firstname = user.Firstname,
+            Lastname = user.Lastname,
+            Title = user.Title,
+            ProfilePictureUrl = user.ProfilePictureUrl,
+            AboutMe = user.AboutMe,
+            Education = user.Educations.Select(education => new UserEducationResponseWithoutUserResponse
+            {
+                Degree = education.Degree,
+                FieldOfStudy = education.FieldOfStudy,
+                StartDate = education.StartDate,
+                EndDate = education.EndDate,
+                SchoolId = education.SchoolId,
+                School = new GetAllSchoolsResponse
+                {
+                    SchoolId = education.School.SchoolId,
+                    SchoolName = education.School.SchoolName,
+                    Location = education.School.Location,
+                    EstablishedAt = education.School.EstablishedAt,
+                    GraduatesCount = education.School.Graduates.Count()
+                },
+            }).ToList()
+        };
+        
+        return Ok(userWithEducationsResponse);
+
+
+    }
     
     [HttpGet("{userId:int}/getSkills")]
     public async Task<IActionResult> GetOneUsersSkills([FromRoute] int userId)
@@ -644,6 +695,8 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
 
     public async Task<IActionResult> UpdateUserEducation([FromRoute] int userId,[FromRoute] int schoolId, [FromBody] UserEducationApiRequest userEducationApiRequest)
     {
+        await IsIncomingDegreeIsValid(userEducationApiRequest.Degree);
+        
         var currentUserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
         if (currentUserIdClaim != null)
@@ -735,6 +788,16 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
             ProblemDescription = $"You have to authenticate first !"
         };
         return Ok(problemDetailResponseNotAuthenticated);
+        
+    }
+
+    public async Task IsIncomingDegreeIsValid(string degree)
+    {
+        string[] degreeTypes = ["Associate", "Bachelor", "Master", "Doctorate"];
+        if (!degreeTypes.Contains(degree))
+        {
+            throw new Exception($"Degree type is not valid. Valid degree types are {degreeTypes}");
+        }
         
     }
 
