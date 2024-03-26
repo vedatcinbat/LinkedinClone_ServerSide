@@ -3,6 +3,6 @@
 public class UserLikeCompanySimpleResponse
 {
     
-    public string CompanyName { get; set; }
+    public string? CompanyName { get; set; }
     
 }

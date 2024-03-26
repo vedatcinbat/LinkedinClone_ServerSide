@@ -1,4 +1,6 @@
-﻿namespace JobNet.CoreApi.Data.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace JobNet.CoreApi.Data.Entities;
 
 public class School
 {
@@ -10,5 +12,5 @@ public class School
     
     public DateTime EstablishedAt { get; set; }
     
-    public List<User> Graduates { get; set; } = new List<User>();
+    public ICollection<User> Graduates { get; set; } = new List<User>();
 }

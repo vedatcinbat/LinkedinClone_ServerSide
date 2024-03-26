@@ -695,8 +695,6 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
 
     public async Task<IActionResult> UpdateUserEducation([FromRoute] int userId,[FromRoute] int schoolId, [FromBody] UserEducationApiRequest userEducationApiRequest)
     {
-        await IsIncomingDegreeIsValid(userEducationApiRequest.Degree);
-        
         var currentUserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
         if (currentUserIdClaim != null)
@@ -788,16 +786,6 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
             ProblemDescription = $"You have to authenticate first !"
         };
         return Ok(problemDetailResponseNotAuthenticated);
-        
-    }
-
-    public async Task IsIncomingDegreeIsValid(string degree)
-    {
-        string[] degreeTypes = ["Associate", "Bachelor", "Master", "Doctorate"];
-        if (!degreeTypes.Contains(degree))
-        {
-            throw new Exception($"Degree type is not valid. Valid degree types are {degreeTypes}");
-        }
         
     }
 

@@ -157,9 +157,11 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         };
         
         await dbContext.Educations.AddAsync(education);
+        
         school.Graduates.Add(user);
+        user.Educations.Add(education);
         await dbContext.SaveChangesAsync();
-
+        
         return user;
     }
 
