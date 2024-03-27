@@ -1,8 +1,11 @@
-﻿using JobNet.CoreApi.Data;
+﻿using System.Security.Claims;
+using JobNet.CoreApi.Data;
 using JobNet.CoreApi.Data.Entities;
 using JobNet.CoreApi.Models.Response;
 using JobNet.CoreApi.Models.Response.Problem;
 using JobNet.CoreApi.Services.FollowService;
+using JobNet.CoreApi.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,16 +13,8 @@ namespace JobNet.CoreApi.Controllers;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class FollowController : ControllerBase
+public class FollowController(IFollowService _followService, JobNetDbContext dbContext, IUserService userService) : ControllerBase
 {
-    private IFollowService _followService;
-    private readonly JobNetDbContext _dbContext;
-
-    public FollowController(IFollowService followService, JobNetDbContext dbContext)
-    {
-        this._followService = followService;
-        this._dbContext = dbContext;
-    }
 
     [HttpGet("allFollows")]
     public async Task<IActionResult> GetAllFollows()
@@ -87,83 +82,142 @@ public class FollowController : ControllerBase
         return Ok(followUserSimpleResponses);
     }
 
-    [HttpPost("{followerId:int}/follow/{userId:int}")]
-    public async Task<IActionResult> FollowUser(int followerId, int userId)
+    [HttpPost("{followerUserId:int}/follow/{userId:int}")]
+    [Authorize]
+    public async Task<IActionResult> FollowUser([FromRoute] int followerUserId, [FromRoute] int userId)
     {
-        if(followerId == userId)
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+            
+            if(currentUserId != followerUserId)
             {
-                ProblemTitle = "Follower and User are the same",
-                ProblemDescription = $"Follower and User are the same with id : {followerId}",
-            };
-            return Ok(problemDetailResponse);
+                ProblemDetailResponse problemDetailResponseNotSame = new ProblemDetailResponse
+                {
+                    ProblemTitle = "Current User Has No Permission",
+                    ProblemDescription = $"CurrentUser({currentUserId}) cannot make operation for FollowerUser({followerUserId})",
+                };
+                return Ok(problemDetailResponseNotSame);
+            }
+            
+            if(followerUserId == userId)
+            {
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "Follower and User are the same",
+                    ProblemDescription = $"Follower and User are the same with id : {followerUserId}",
+                };
+                return Ok(problemDetailResponse);
+            }
+        
+            var followerUser = await dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == followerUserId);
+            if(followerUser == null)
+            {
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "Follower not found",
+                    ProblemDescription = $"Follower not found with id : {followerUserId}",
+                };
+                return Ok(problemDetailResponse);
+            }
+        
+            var user = await dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+            if(user == null)
+            {
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User not found",
+                    ProblemDescription = $"User not found with id : {userId}",
+                };
+                return Ok(problemDetailResponse);
+            }
+        
+            var result = await _followService.FollowUser(followerUserId, userId, followerUser, user);
+        
+            return Ok(result);
         }
         
-        var followerUser = await _dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == followerId);
-        if(followerUser == null)
+        ProblemDetailResponse problemDetailResponseNoAuth = new ProblemDetailResponse
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
-            {
-                ProblemTitle = "Follower not found",
-                ProblemDescription = $"Follower not found with id : {followerId}",
-            };
-            return Ok(problemDetailResponse);
-        }
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponseNoAuth);
+
         
-        var user = await _dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
-        if(user == null)
-        {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
-            {
-                ProblemTitle = "User not found",
-                ProblemDescription = $"User not found with id : {userId}",
-            };
-            return Ok(problemDetailResponse);
-        }
-        
-        var result = await _followService.FollowUser(followerId, userId, followerUser, user);
-        
-        return Ok(result);
     }
+    
     [HttpPatch("{unFollowerId:int}/unfollow/{userId:int}")]
+    [Authorize]
     public async Task<IActionResult> UnFollowUser(int unFollowerId, int userId)
     {
-        if (unFollowerId == userId)
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
         {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (currentUserId != unFollowerId)
             {
-                ProblemTitle = "Unfollower and User are the same",
-                ProblemDescription = $"Unfollower and User are the same with id : {unFollowerId}",
-            };
-            return Ok(problemDetailResponse);
-        }
-        
-        var unFollowerUser = await _dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == unFollowerId);
-        if(unFollowerUser == null)
-        {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                ProblemDetailResponse problemDetailResponseNotSame = new ProblemDetailResponse
+                {
+                    ProblemTitle = "Current User Has No Permission",
+                    ProblemDescription = $"CurrentUser({currentUserId}) cannot make operation for FollowerUser({unFollowerId})",
+                };
+                return Ok(problemDetailResponseNotSame);
+            }
+            
+            if (unFollowerId == userId)
             {
-                ProblemTitle = "UnFollower not found",
-                ProblemDescription = $"UnFollower not found with id : {unFollowerId}",
-            };
-            return Ok(problemDetailResponse);
-        }
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "UnfollowUser and User are the same",
+                    ProblemDescription = $"UnfollowUser and User are the same with id : {unFollowerId}",
+                };
+                return Ok(problemDetailResponse);
+            }
         
-        var user = await _dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
-        if(user == null)
-        {
-            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            var unFollowerUser = await dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == unFollowerId);
+            if(unFollowerUser == null)
             {
-                ProblemTitle = "User not found",
-                ProblemDescription = $"User not found with id : {userId}",
-            };
-            return Ok(problemDetailResponse);
-        }
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "UnFollower not found",
+                    ProblemDescription = $"UnFollower not found with id : {unFollowerId}",
+                };
+                return Ok(problemDetailResponse);
+            }
         
-        var result = await _followService.UnFollowUser(unFollowerId, userId);
+            var user = await dbContext.Users.Where(user => user.IsDeleted == false).FirstOrDefaultAsync(u => u.UserId == userId);
+            if(user == null)
+            {
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User not found",
+                    ProblemDescription = $"User not found with id : {userId}",
+                };
+                return Ok(problemDetailResponse);
+            }
+        
+            var result = await _followService.UnFollowUser(unFollowerId, userId);
 
 
-        return Ok(result);
+            return Ok(result);
+        }
+        
+        ProblemDetailResponse problemDetailResponseNoAuth = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponseNoAuth);
+
+
+
+        
     }
+    
+    
 }

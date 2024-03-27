@@ -25,6 +25,7 @@ public interface IUserService
     Task<List<User>> GetFollowings(int userId);
     
     Task<User?> UpdateUserCompanyWithId(int userId, int companyId);
+    
     Task<User> AddSchoolToUser(User user, School school, UserEducationApiRequest userEducationApiRequest);
     
     Task<User?> GetUserSkill(int userId);
