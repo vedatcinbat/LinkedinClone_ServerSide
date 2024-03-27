@@ -16,12 +16,11 @@ namespace JobNet.CoreApi.Controllers;
 
 public class PostController(IPostService postService, JobNetDbContext _dbContext) : ControllerBase
 {
-    private readonly IPostService _postService = postService;
     
     [HttpGet("allPosts")]
     public async Task<IActionResult> GetAllPosts()
     {
-        List<Post> posts = await _postService.GetAllPosts();
+        List<Post> posts = await postService.GetAllPosts();
         
         var postSimpleApiResponses = posts.Select(post => new GetAllPostSimpleResponse()
         {
@@ -75,7 +74,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
             return Ok(problemDetailResponse);
         }
         
-        var post = await _postService.GetOnePost(postId);
+        var post = await postService.GetOnePost(postId);
         
         PostSimpleApiResponse postSimpleApiResponse = new PostSimpleApiResponse
         {
@@ -167,7 +166,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
             
             var userId = Convert.ToInt32(userIdClaim.Value);
             
-            var response = await _postService.CreatePost(userId, createPostApiRequest);
+            var response = await postService.CreatePost(userId, createPostApiRequest);
 
             return Ok(response);
         }

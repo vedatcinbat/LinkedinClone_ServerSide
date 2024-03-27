@@ -52,7 +52,7 @@ public class SchoolController(JobNetDbContext dbContext) : ControllerBase
         return Ok(schoolResponse);
     }
     
-    [HttpGet("get-school-graduates/{schoolId}")]
+    [HttpGet("get-school-graduates/{schoolId:int}")]
     public async Task<IActionResult> GetSchoolGraduates(int schoolId)
     {
         var school = await dbContext.Schools.Include(school => school.Graduates).ThenInclude(user => user.Company).FirstOrDefaultAsync(school => school.SchoolId == schoolId);
