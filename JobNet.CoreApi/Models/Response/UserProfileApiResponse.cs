@@ -33,7 +33,7 @@ public class UserProfileApiResponse
     
     public ICollection<PostApiResponseWithoutUser>? Posts { get; set; }
 
-    public ICollection<Experience>? Experiences { get; set; }
+    public ICollection<ExperienceSimpleWithoutUserApiResponse>? Experiences { get; set; }
 
     public ICollection<UserEducationResponseWithoutUserResponse>? Educations { get; set; }
 

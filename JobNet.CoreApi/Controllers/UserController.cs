@@ -150,7 +150,28 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
                 CommentCount = post.CommentCount,
                 LikeCount = post.LikeCount,
             }).ToList(),
-            Experiences = user.Experiences,
+            Experiences = user.Experiences.Select(experience => new ExperienceSimpleWithoutUserApiResponse
+            {
+                ExperienceId = experience.ExperienceId,
+                Title = experience.Title,
+                CompanyName = experience.CompanyName,
+                Location = experience.Location,
+                StartDate = experience.StartDate,
+                EndDate = experience.EndDate,
+                Description = experience.Description,
+                CompanyId = experience.CompanyId,
+                Company = new UserCompanySimpleResponse
+                {
+                    CompanyId = experience.Company.CompanyId,
+                    CompanyName = experience.Company.CompanyName,
+                    Industry = experience.Company.Industry,
+                    Description = experience.Company.Description,
+                    EmployeeCount = experience.Company.EmployeeCount,
+                    WebsiteUrl = experience.Company.WebsiteUrl,
+                    LogoUrl = experience.Company.LogoUrl,
+                    FoundedAt = experience.Company.FoundedAt
+                }
+            }).ToList(),
             Educations = user.Educations.Select(education => new UserEducationResponseWithoutUserResponse
             {
                 Degree = education.Degree,
@@ -638,6 +659,117 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
         return Ok(problemDetailResponse2);
 
 
+    }
+
+    [HttpPost("{userId:int}/experience/{companyId:int}")]
+    public async Task<IActionResult> CreateExperience([FromRoute] int userId, [FromRoute] int companyId, CreateExperienceApiRequest createExperienceApiRequest)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (currentUserId != userId)
+            {
+                ProblemDetailResponse problemDetailResponsePermission = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User has no permission",
+                    ProblemDescription =
+                        $"User({currentUserId}) has no permission to create experience for user({userId})"
+                };
+                return Ok(problemDetailResponsePermission);
+            }
+
+            var user = await dbContext.Users.Where(u => u.IsDeleted == false).Include(user => user.Company)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            var company = await dbContext.Companies.FirstOrDefaultAsync(company => company.CompanyId == companyId);
+
+            if (user == null)
+            {
+                ProblemDetailResponse problemDetailResponseNoUser = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User not found",
+                    ProblemDescription = $"User not found with this id {userId}"
+                };
+                return Ok(problemDetailResponseNoUser);
+            }
+
+
+            if (company == null)
+            {
+                ProblemDetailResponse problemDetailResponseNoCompany = new ProblemDetailResponse
+                {
+                    ProblemTitle = "Company not found",
+                    ProblemDescription = $"Company not found with this id {companyId}"
+                };
+                return Ok(problemDetailResponseNoCompany);
+            }
+
+            var experienceId = await dbContext.Experiences.CountAsync() + 1;
+
+            Experience newExperience = new Experience
+            {
+                ExperienceId = experienceId,
+                Title = createExperienceApiRequest.Title,
+                CompanyName = company.CompanyName,
+                Location = createExperienceApiRequest.Title,
+                StartDate = createExperienceApiRequest.StartDate,
+                EndDate = createExperienceApiRequest.EndDate,
+                Description = createExperienceApiRequest.Description,
+                UserId = user.UserId,
+                User = user,
+                CompanyId = company.CompanyId,
+                Company = company
+            };
+
+            await dbContext.Experiences.AddAsync(newExperience);
+            await dbContext.SaveChangesAsync();
+
+            var experienceSimpleResponse = new ExperienceSimpleApiResponse
+            {
+                ExperienceId = newExperience.ExperienceId,
+                Title = newExperience.Title,
+                CompanyName = newExperience.CompanyName,
+                Location = newExperience.Location,
+                StartDate = newExperience.StartDate,
+                EndDate = newExperience.EndDate,
+                Description = newExperience.Description,
+                UserId = newExperience.UserId,
+                User = new UserSimpleApiResponseWithSimpleCompanyResponse
+                {
+                    UserId = newExperience.User.UserId,
+                    Firstname = newExperience.User.Firstname,
+                    Lastname = newExperience.User.Lastname,
+                    Title = newExperience.User.Title,
+                    ProfilePictureUrl = newExperience.User.ProfilePictureUrl,
+                    AboutMe = newExperience.User.AboutMe,
+                    IsDeleted = newExperience.User.IsDeleted,
+                    CompanyId = newExperience.User.CompanyId,
+                    Company = new CompanyWithCompanyNameResponse
+                    {
+                        CompanyName = newExperience.User.Company.CompanyName
+                    }
+                },
+                CompanyId = newExperience.CompanyId,
+                Company = new CompanyWithCompanyNameResponse
+                {
+                    CompanyName = newExperience.Company.CompanyName
+                }
+            };
+            
+            return Ok(experienceSimpleResponse);
+
+        }
+
+
+        ProblemDetailResponse problemDetailResponseAuth = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponseAuth);
     }
 
     

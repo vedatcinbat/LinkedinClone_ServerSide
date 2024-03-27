@@ -115,7 +115,8 @@ public class EducationController(JobNetDbContext dbContext, IUserService userSer
         {
             var currentUserId = Convert.ToInt32(currentUserIdClaim.Value);
 
-            var user = await dbContext.Users.Where(u => u.IsDeleted == false)
+            var user = await dbContext.Users.Where(u => u.IsDeleted == false).Include(user => user.Educations)
+                .ThenInclude(education => education.School)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (currentUserId != userId)
@@ -171,7 +172,7 @@ public class EducationController(JobNetDbContext dbContext, IUserService userSer
                     LogoUrl = userResponse.Company.LogoUrl,
                     FoundedAt = userResponse.Company.FoundedAt
                 } : null,
-                Educations = userResponse.Educations.Select(education => new UserEducationResponseWithoutUserResponse
+                Educations = user.Educations.Select(education => new UserEducationResponseWithoutUserResponse
                 {
                     Degree = education.Degree,
                     FieldOfStudy = education.FieldOfStudy,

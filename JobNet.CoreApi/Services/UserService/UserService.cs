@@ -33,6 +33,7 @@ public class UserService(JobNetDbContext dbContext) : IUserService
                 .Include(u => u.Posts)
                     .ThenInclude(p => p.Comments.Where(comment => comment.IsDeleted == false))
                 .Include(u => u.Experiences)
+                    .ThenInclude(e => e.Company)
                 .Include(u => u.Educations)
                 .ThenInclude(e => e.School)
                 .Include(u => u.Skills)
@@ -157,9 +158,7 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         };
         
         await dbContext.Educations.AddAsync(education);
-        
         school.Graduates.Add(user);
-        user.Educations.Add(education);
         await dbContext.SaveChangesAsync();
         
         return user;
