@@ -26,6 +26,17 @@ builder.Services.AddDbContext<JobNetDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("mysqlConnectionString"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("mysqlConnectionString")));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173") 
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters()
@@ -94,5 +105,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapDefaultControllerRoute();
+
+app.UseCors("AllowReactApp");
 
 app.Run();

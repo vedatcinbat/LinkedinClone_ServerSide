@@ -21,7 +21,7 @@ public class CreateUserApiRequest
     
     public string CurrentLanguage { get; set; }
     
-    public string ProfilePictureUrl { get; set; }
+    public string? ProfilePictureUrl { get; set; }
     
     public string? AboutMe { get; set; }
     

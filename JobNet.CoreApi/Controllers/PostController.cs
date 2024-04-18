@@ -57,7 +57,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
         }).ToList();
 
         return Ok(postSimpleApiResponses);
-    }
+    } 
 
     [HttpGet("{postId:int}")]
     public async Task<IActionResult> GetOnePostWithPostId([FromRoute] int postId)
@@ -241,8 +241,5 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
 
 
     }
-    
-    
-    
     
 }

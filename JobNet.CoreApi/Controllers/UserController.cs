@@ -440,6 +440,18 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateUserApiResponse))]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserApiRequest createUserApiRequest)
     {
+        var emails = await dbContext.Users.Select(u => u.Email).ToListAsync();
+
+        if (emails.Contains(createUserApiRequest.Email))
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "You have already an account",
+                ProblemDescription = "Email already exists in the system !"
+            };
+            return BadRequest(problemDetailResponse);
+        }
+        
         var user = await userService.CreateUser(createUserApiRequest);
         
         CreateUserApiResponse createUserApiResponse = new CreateUserApiResponse
