@@ -2,12 +2,13 @@
 using JobNet.CoreApi.Auth;
 using JobNet.CoreApi.Services.UserService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http;
 
 
 namespace JobNet.CoreApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("/api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -31,6 +32,7 @@ public class AuthController : ControllerBase
 
         return Ok(token);
     }
+    
 
     [HttpGet("getUserId")]
     public async Task<IActionResult> GetUserId()

@@ -94,13 +94,13 @@ public class PostService : IPostService
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 IsDeleted = user.IsDeleted,
                 CompanyId = user.CompanyId,
-                Company = new UserPostCompanySimpleResponse
+                Company = user.Company != null ? new UserPostCompanySimpleResponse
                 {
                     CompanyId = user.Company.CompanyId,
                     CompanyName = user.Company.CompanyName,
                     Industry = user.Company.Industry,
                     LogoUrl = user.Company.LogoUrl
-                }
+                } : null
             },
             PublishTime = DateTime.UtcNow,
             Caption = createPostApiRequest.Caption,

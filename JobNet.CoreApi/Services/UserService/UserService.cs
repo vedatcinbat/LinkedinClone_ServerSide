@@ -1,6 +1,9 @@
-﻿using JobNet.CoreApi.Data;
+﻿using System.Security.Cryptography;
+using System.Text;
+using JobNet.CoreApi.Data;
 using JobNet.CoreApi.Data.Entities;
 using JobNet.CoreApi.Models.Request;
+using System.Security.Cryptography;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -73,6 +76,8 @@ public class UserService(JobNetDbContext dbContext) : IUserService
     public async Task<User> CreateUser(CreateUserApiRequest createUserApiRequest)
     {
         var userId = await dbContext.Users.CountAsync() + 1;
+
+        string hashedPassword = HashPassword(createUserApiRequest.HashedPassword);
         
         var newUser = new User
         {
@@ -80,7 +85,7 @@ public class UserService(JobNetDbContext dbContext) : IUserService
             Firstname = createUserApiRequest.Firstname,
             Lastname = createUserApiRequest.Lastname,
             Title = createUserApiRequest.Title,
-            HashedPassword = createUserApiRequest.HashedPassword,
+            HashedPassword = hashedPassword,
             Email = createUserApiRequest.Email,
             Age = createUserApiRequest.Age,
             Country = createUserApiRequest.Country,
@@ -100,6 +105,21 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         await dbContext.SaveChangesAsync();
 
         return newUser;
+    }
+    
+    private string HashPassword(string password)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            StringBuilder builder = new StringBuilder();
+            foreach (byte b in bytes)
+            {
+                builder.Append(b.ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
     }
 
     public async Task<List<User>> GetFollowers(int userId)
@@ -175,7 +195,10 @@ public class UserService(JobNetDbContext dbContext) : IUserService
     {
         var user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user == null)
+        {
             return null;
+        }
+            
         
         if (!VerifyPasswordHash(password, user.HashedPassword))
             return null;
@@ -183,19 +206,35 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         return user;
     }
 
+    private bool VerifyPasswordHash(string password, string storedHash)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            string hashedPassword = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+
+            return hashedPassword == storedHash;
+        }
+    }
     public async Task<User?> SaveAccount(string email, string password)
     {
+        // Hash the password
+        string hashedPassword = HashPassword(password);
+
         var user = await dbContext.Users.FirstOrDefaultAsync(user =>
-            user.IsDeleted == true && user.Email == email && user.HashedPassword == password);
+            user.IsDeleted == true && user.Email == email);
         if (user != null)
         {
+            // Update the user's password with the new hashed password
+            user.HashedPassword = hashedPassword;
+
+            // Restore other user-related data as needed
             var userLikes = await dbContext.Likes.Where(l => l.User.UserId == user.UserId).ToListAsync();
             var userComments = await dbContext.Comments.Where(c => c.User.UserId == user.UserId).ToListAsync();
             var userFollows = await dbContext.Follows
                 .Where(f => f.IsDeleted == true && (f.FollowerId == user.UserId || f.FollowingId == user.UserId))
                 .ToListAsync();
-            
-            
+
             foreach (var comment in userComments)
             {
                 comment.IsDeleted = false;
@@ -208,20 +247,17 @@ public class UserService(JobNetDbContext dbContext) : IUserService
             {
                 follow.IsDeleted = false;
             }
-            
+
+            // Restore the user account
             user.IsDeleted = false;
+        
+            // Save changes to the database
             await dbContext.SaveChangesAsync();
 
             return user;
         }
 
         return null;
-    }
-
-    private bool VerifyPasswordHash(string password, string storedHash)
-    {
-        if (password == storedHash) return true;
-        return false;
     }
     
 }
