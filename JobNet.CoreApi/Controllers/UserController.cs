@@ -216,7 +216,6 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
             Firstname = user.Firstname,
             Lastname = user.Lastname,
             Title = user.Title,
-            HashedPassword = user.HashedPassword,
             Email = user.Email,
             Age = user.Age,
             Country = user.Country,
@@ -784,7 +783,79 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
         return Ok(problemDetailResponseAuth);
     }
 
-    
+    [HttpPatch("{userId:int}/updateAboutMe")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUserAboutMe([FromRoute] int userId, [FromBody] UpdateUserAboutMeApiRequest updateUserAboutMeApiRequest)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim != null)
+        {
+            var currentUserId = Convert.ToInt32(userIdClaim.Value);
+
+            if (currentUserId != userId)
+            {
+                ProblemDetailResponse problemDetailResponsePermission = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User has no permission",
+                    ProblemDescription =
+                        $"User({currentUserId}) has no permission to update about me for user({userId})"
+                };
+                return Ok(problemDetailResponsePermission);
+            }
+
+            var user = await dbContext.Users.Where(u => u.IsDeleted == false).Include(u => u.Company).FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+            {
+                ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+                {
+                    ProblemTitle = "User not found",
+                    ProblemDescription = $"User not found with id({userId})"
+                };
+                return Ok(problemDetailResponse);
+            }
+
+            user.AboutMe = updateUserAboutMeApiRequest.AboutMe;
+            await dbContext.SaveChangesAsync();
+
+            var userSimpleApiResponse = new UserSimpleApiResponse
+            {
+                UserId = user.UserId,
+                Firstname = user.Firstname,
+                Lastname = user.Lastname,
+                Title = user.Title,
+                HashedPassword = user.HashedPassword,
+                Email = user.Email,
+                Age = user.Age,
+                Country = user.Country,
+                CurrentLanguage = user.CurrentLanguage,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                AboutMe = user.AboutMe,
+                CompanyId = user.CompanyId,
+                Company = user.Company != null ? new UserCompanySimpleResponse
+                {
+                    CompanyId = user.Company.CompanyId,
+                    CompanyName = user.Company.CompanyName,
+                    Industry = user.Company.Industry,
+                    Description = user.Company.Description,
+                    EmployeeCount = user.Company.EmployeeCount,
+                    WebsiteUrl = user.Company.WebsiteUrl,
+                    LogoUrl = user.Company.LogoUrl,
+                    FoundedAt = user.Company.FoundedAt
+                } : null,
+            };
+
+            return Ok(userSimpleApiResponse);
+        }
+
+        ProblemDetailResponse problemDetailResponse2 = new ProblemDetailResponse
+        {
+            ProblemTitle = "User not found",
+            ProblemDescription = $"You have to authenticate first !"
+        };
+        return Ok(problemDetailResponse2);
+    }
 
     [HttpPatch("removeSkill/{skillId:int}")]
     public async Task<IActionResult> RemoveSkillFromUser([FromRoute] int skillId)
