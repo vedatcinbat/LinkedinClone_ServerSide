@@ -5,6 +5,6 @@ namespace JobNet.CoreApi.Services;
 
 public interface ICompanyService
 {
-    Task<List<Company>> GetAllCompanies();
+    Task<List<Company>> GetAllCompanies(string? companyName);
     Task<Company> CreateCompany(CreateCompanyApiRequest createCompanyApiRequest);
 }

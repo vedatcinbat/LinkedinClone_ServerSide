@@ -19,13 +19,20 @@ public class CompanyService : ICompanyService
         this._dbContext = dbContext;
     }
 
-    public async Task<List<Company>> GetAllCompanies()
+    public async Task<List<Company>> GetAllCompanies(string? companyName)
     {
-        List<Company> companies = await _dbContext.Companies
+        IQueryable<Company> query = _dbContext.Companies
             .Include(c => c.CurrentAvailableJobs)
-            .Include(c => c.TalentManagers)
-            .ToListAsync();
+            .Include(c => c.TalentManagers);
         
+        
+        if (!string.IsNullOrEmpty(companyName))
+        {
+            query = query.Where(c => c.CompanyName.Contains(companyName));
+        }
+
+        var companies = await query.ToListAsync();
+
         return companies;
     }
 
