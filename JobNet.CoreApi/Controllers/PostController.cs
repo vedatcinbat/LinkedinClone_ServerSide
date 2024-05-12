@@ -155,7 +155,7 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
         return Ok(postSimpleApiResponse);
     }
     
-    [HttpPost("/createPost")]
+    [HttpPost("createPost")]
     [Authorize]
     public async Task<IActionResult> CreatePost(CreatePostApiRequest createPostApiRequest)
     {
@@ -181,11 +181,12 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
         
     }
 
-    [HttpDelete("/deletePost/{postId:int}")]
+    [HttpDelete("deletePost/{postId:int}")]
     [Authorize]
     public async Task<IActionResult> DeletePost([FromRoute] int postId)
     {
-        Post post = await _dbContext.Posts.FirstOrDefaultAsync(p => p.IsDeleted == false && p.PostId == postId);
+        var post = await _dbContext.Posts.Where(p => p.IsDeleted == false).FirstOrDefaultAsync(p => p.PostId == postId);
+        
         if (post == null)
         {
             ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse

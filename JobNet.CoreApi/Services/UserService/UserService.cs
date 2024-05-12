@@ -31,9 +31,9 @@ public class UserService(JobNetDbContext dbContext) : IUserService
             dbContext.Users
                 .Where(user => user.IsDeleted == false)
                 .Include(u => u.Company)
-                .Include(u => u.Posts)
+                .Include(u => u.Posts.Where(p => p.IsDeleted == false))
                     .ThenInclude(p => p.Likes.Where(like => like.IsDeleted == false))
-                .Include(u => u.Posts)
+                .Include(u => u.Posts.Where(p => p.IsDeleted == false))
                     .ThenInclude(p => p.Comments.Where(comment => comment.IsDeleted == false))
                 .Include(u => u.Experiences)
                     .ThenInclude(e => e.Company)
