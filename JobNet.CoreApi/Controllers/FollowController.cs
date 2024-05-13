@@ -218,6 +218,20 @@ public class FollowController(IFollowService _followService, JobNetDbContext dbC
 
         
     }
-    
+
+    [HttpGet("{userId:int}/isFollowing/{followingUserId:int}")]
+    public async Task<IActionResult> IsThisUserFollowAnotherUser([FromRoute] int userId,
+        [FromRoute] int followingUserId)
+    {
+        var user = await dbContext.Users.Where(user => user.IsDeleted == false)
+            .Include(user => user.Following.Where(f => f.IsDeleted == false)).FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (user == null)
+        {
+            return BadRequest($"User not found with id : {userId}");
+        }
+        
+        return Ok(user.Following.Any(f => f.FollowingId == followingUserId));
+    }
     
 }
