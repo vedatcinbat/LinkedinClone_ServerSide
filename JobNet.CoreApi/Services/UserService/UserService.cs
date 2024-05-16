@@ -184,6 +184,25 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         return user;
     }
 
+    public async Task<List<Post>> GetUserConnectionsPosts(int userId)
+    {
+        var followings = await dbContext.Follows.Where(f => f.FollowerId == userId && f.IsDeleted == false).ToListAsync();
+        
+        List<Post> posts = new List<Post>();
+        
+        foreach (var following in followings)
+        {
+            var followingPosts = await dbContext.Posts
+                .Include(p => p.User).ThenInclude(u => u.Company)
+                .Where(p => p.UserId == following.FollowingId && p.IsDeleted == false)
+                .ToListAsync();
+            
+            posts.AddRange(followingPosts);
+        }
+        
+        return posts;
+    }
+
 
     public async Task<User?> GetUserSkill(int userId)
     {

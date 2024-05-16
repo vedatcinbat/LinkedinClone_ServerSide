@@ -34,4 +34,6 @@ public interface IUserService
 
     Task<User?> SaveAccount(string email, string password);
 
+    Task<List<Post>> GetUserConnectionsPosts(int userId);
+
 }

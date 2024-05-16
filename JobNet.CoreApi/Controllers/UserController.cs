@@ -435,6 +435,61 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
         return Ok(userSkillSimpleApiResponse);
     }
 
+    [HttpGet("getConnectionPosts")]
+    public async Task<IActionResult> GetCurrentUserConnectionsPosts()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        
+        if (userIdClaim != null)
+        {
+            var userId = Convert.ToInt32(userIdClaim.Value);
+
+            var posts = await userService.GetUserConnectionsPosts(userId);
+
+            var postsResponse = posts.Select(post => new UserConnectionsPostsResponse()
+            {
+                PostId = post.PostId,
+                IsDeleted = post.IsDeleted,
+                UserId = post.User.UserId,
+                User = new UserPostSimpleResponse
+                {
+                    UserId = post.User.UserId,
+                    Firstname = post.User.Firstname,
+                    Lastname = post.User.Lastname,
+                    Title = post.User.Title,
+                    ProfilePictureUrl = post.User.ProfilePictureUrl == null ? null : post.User.ProfilePictureUrl,
+                    IsDeleted = post.User.IsDeleted,
+                    CompanyId = post.User.CompanyId,
+                    Company = post.User.Company != null ? new UserPostCompanySimpleResponse
+                    {
+                        CompanyId = post.User.Company.CompanyId,
+                        CompanyName = post.User.Company.CompanyName,
+                        Industry = post.User.Company.Industry,
+                        LogoUrl = post.User.Company.LogoUrl
+                    } : null
+                },
+                PublishTime = post.PublishTime,
+                Caption = post.Caption,
+                PostType = post.PostType,
+                TextContent = post.TextContent,
+                ImageContent = post.ImageContent,
+                ImagesContent = post.ImagesContent,
+                CommentCount = post.CommentCount,
+                LikeCount = post.LikeCount,
+            });
+
+            return Ok(postsResponse);
+        }
+
+        ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+        {
+            ProblemTitle = "Authentication Error",
+            ProblemDescription = "You have to authenticate first !"
+        };
+        
+        return BadRequest(problemDetailResponse);
+    }
+
     [HttpPost("createUser")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateUserApiResponse))]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserApiRequest createUserApiRequest)
