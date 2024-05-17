@@ -154,6 +154,89 @@ public class PostController(IPostService postService, JobNetDbContext _dbContext
         
         return Ok(postSimpleApiResponse);
     }
+
+    [HttpGet("{postId:int}/likes")]
+    public async Task<IActionResult> GetOnePostLikesWithPostId([FromRoute] int postId)
+    {
+        var p = await _dbContext.Posts.FirstOrDefaultAsync(p => p.IsDeleted == false && p.PostId == postId);
+
+        if (p == null)
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "Post not found",
+                ProblemDescription = $"Post not found with id ({postId})"
+            };
+            return Ok(problemDetailResponse);
+        }
+
+        var post = await postService.GetOnePost(postId);
+
+        var likeSimpleResponses = post.Likes.Select(l =>
+            new LikeSimpleResponse
+            {
+                LikeId = l.LikeId,
+                IsDeleted = l.IsDeleted,
+                UserId = l.UserId,
+                User = new UserPostSimpleResponse
+                {
+                    UserId = l.User.UserId,
+                    Firstname = l.User.Firstname,
+                    Lastname = l.User.Lastname,
+                    Title = l.User.Title,
+                    ProfilePictureUrl = l.User.ProfilePictureUrl,
+                    IsDeleted = l.User.IsDeleted,
+                    CompanyId = l.User.CompanyId,
+                    Company = l.User.Company != null
+                        ? new UserPostCompanySimpleResponse
+                        {
+                            CompanyId = l.User.Company.CompanyId,
+                            CompanyName = l.User.Company.CompanyName,
+                            Industry = l.User.Company.Industry,
+                            LogoUrl = l.User.Company.LogoUrl
+                        }
+                        : null
+                } 
+            }).ToList();
+    
+        return Ok(likeSimpleResponses);
+
+    }
+
+    [HttpGet("{postId:int}/doILike/{userId:int}")]
+    public async Task<IActionResult> DoILikeThisPost([FromRoute] int postId, [FromRoute] int userId)
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null)
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "User not found",
+                ProblemDescription = $"You have to authenticate first !"
+            };
+            return Ok(problemDetailResponse);
+        }
+        
+        var post = _dbContext.Posts.Where(p => p.IsDeleted == false)
+            .Include(p => p.Likes.Where(l => l.IsDeleted == false))
+            .ThenInclude(l => l.User)
+            .FirstOrDefault(p => p.PostId == postId);
+        
+        if(post == null)
+        {
+            ProblemDetailResponse problemDetailResponse = new ProblemDetailResponse
+            {
+                ProblemTitle = "Post not found",
+                ProblemDescription = $"Post not found with id ({postId})"
+            };
+            return Ok(problemDetailResponse);
+        }
+
+        var isUserLiked = post.Likes.Any(l => l.User.UserId == userId);
+        
+        return Ok(isUserLiked);
+    }
     
     [HttpPost("createPost")]
     [Authorize]

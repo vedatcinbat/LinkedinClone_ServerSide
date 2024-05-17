@@ -194,6 +194,9 @@ public class UserService(JobNetDbContext dbContext) : IUserService
         {
             var followingPosts = await dbContext.Posts
                 .Include(p => p.User).ThenInclude(u => u.Company)
+                .Include(p => p.Likes.Where(l => l.IsDeleted == false))
+                .ThenInclude(l => l.User)
+                .Include(p => p.Comments.Where(c => c.IsDeleted == false))
                 .Where(p => p.UserId == following.FollowingId && p.IsDeleted == false)
                 .ToListAsync();
             

@@ -55,7 +55,7 @@ public class LikeController : ControllerBase
         
     }
     
-    [HttpPatch("{userId:int}/unlike/{postId:int}")]
+    [HttpPatch("{userId:int}/dislike/{postId:int}")]
     public async Task<IActionResult> UnLikePost([FromRoute] int userId, [FromRoute] int postId)
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
