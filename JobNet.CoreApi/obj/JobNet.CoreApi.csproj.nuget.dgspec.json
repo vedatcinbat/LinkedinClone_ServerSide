@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj": {}
+    "C:\\Users\\cinba\\Desktop\\LinkedinClone_Server\\JobNet.CoreApi\\JobNet.CoreApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj": {
+    "C:\\Users\\cinba\\Desktop\\LinkedinClone_Server\\JobNet.CoreApi\\JobNet.CoreApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
+        "projectUniqueName": "C:\\Users\\cinba\\Desktop\\LinkedinClone_Server\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
         "projectName": "JobNet.CoreApi",
-        "projectPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
-        "packagesPath": "C:\\Users\\vedat.cinbat\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\vedat.cinbat\\Desktop\\JobNetServer\\JobNet.CoreApi\\obj\\",
+        "projectPath": "C:\\Users\\cinba\\Desktop\\LinkedinClone_Server\\JobNet.CoreApi\\JobNet.CoreApi.csproj",
+        "packagesPath": "C:\\Users\\cinba\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\cinba\\Desktop\\LinkedinClone_Server\\JobNet.CoreApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\vedat.cinbat\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\cinba\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -34,6 +34,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -96,7 +101,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
