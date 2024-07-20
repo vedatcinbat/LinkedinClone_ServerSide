@@ -22,7 +22,7 @@ public class GetCompanyApiResponse
 
     public DateTime FoundedAt { get; set; }
 
-    public IEnumerable<JobDto> CurrentAvailableJobs { get; set; }
+    public IEnumerable<JobDto>? CurrentAvailableJobs { get; set; }
     
-    public IEnumerable<UserTalentManagerResponse> TalentManagers { get; set; }
+    public IEnumerable<UserTalentManagerResponse>? TalentManagers { get; set; }
 }

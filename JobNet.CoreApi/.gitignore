@@ -20,9 +20,17 @@ Generated_Code/
 # Visual Studio Code
 .vscode/
 
-# NuGet
+# All NuGet
+**/packages/*
 *.nuget.targets
 *.nuget.props
 
+
 /appsettings.json
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 

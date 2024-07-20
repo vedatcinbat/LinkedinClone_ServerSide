@@ -32,10 +32,10 @@ public class AuthController : ControllerBase
 
         return Ok(token);
     }
-    
+
 
     [HttpGet("getUserId")]
-    public async Task<IActionResult> GetUserId()
+    public IActionResult GetUserId()
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 

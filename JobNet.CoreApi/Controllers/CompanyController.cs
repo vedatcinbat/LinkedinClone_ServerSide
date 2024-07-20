@@ -41,7 +41,7 @@ public class CompanyController : ControllerBase
             WebsiteUrl = company.WebsiteUrl,
             LogoUrl = company.LogoUrl,
             FoundedAt = company.FoundedAt,
-            CurrentAvailableJobs = company.CurrentAvailableJobs.Select(job => new JobDto
+            CurrentAvailableJobs = company.CurrentAvailableJobs != null ? company.CurrentAvailableJobs.Select(job => new JobDto
             {
                 JobId = job.JobId,
                 JobTitle = job.JobTitle,
@@ -51,8 +51,8 @@ public class CompanyController : ControllerBase
                 Location = job.Location,
                 PostedAt = job.PostedAt,
                 Deadline = job.Deadline
-            }),
-            TalentManagers = company.TalentManagers.Select(user => new UserTalentManagerResponse
+            }) : null,
+            TalentManagers = company.TalentManagers?.Select(user => new UserTalentManagerResponse
             {
                 UserId = user.UserId,
                 Firstname = user.Firstname,
