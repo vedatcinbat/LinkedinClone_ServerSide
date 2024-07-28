@@ -9,15 +9,15 @@ public class CreateJobApiResponse
 {
     public int JobId { get; set; }
     
-    public string JobTitle { get; set; }
+    public required string JobTitle { get; set; }
     
-    public string JobType { get; set; }
+    public required string JobType { get; set; }
     
-    public string JobEmployeeLevel { get; set; }
+    public required string JobEmployeeLevel { get; set; }
     
-    public string Description { get; set; }
+    public required string Description { get; set; }
     
-    public string Location { get; set; }
+    public required string Location { get; set; }
     
     public DateTime PostedAt { get; set; }
     
@@ -26,12 +26,12 @@ public class CreateJobApiResponse
     [ForeignKey("UserId")]
     public int PublisherId { get; set; }
     
-    public UserTalentManagerResponse PublisherUser { get; set; }
+    public required UserTalentManagerResponse PublisherUser { get; set; }
     
     [ForeignKey("CompanyId")]
     public int CompanyId { get; set; }
     public UserCompanySimpleResponse? Company { get; set; }
     
-    public List<UserSimpleWithSimpleCompanyResponse> UserJobLikeResponses { get; set; }
+    public required List<UserSimpleWithSimpleCompanyResponse> UserJobLikeResponses { get; set; }
     
 }

@@ -815,7 +815,7 @@ public class UserController(IUserService userService, JobNetDbContext dbContext)
                     CompanyId = newExperience.User.CompanyId,
                     Company = new CompanyWithCompanyNameResponse
                     {
-                        CompanyName = newExperience.User.Company.CompanyName
+                        CompanyName = newExperience.User.Company?.CompanyName
                     }
                 },
                 CompanyId = newExperience.CompanyId,

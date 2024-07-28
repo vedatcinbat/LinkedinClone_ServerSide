@@ -2,5 +2,5 @@
 
 public class CompanyWithCompanyNameResponse
 {
-    public string CompanyName { get; set; }
+    public string? CompanyName { get; set; }
 }
